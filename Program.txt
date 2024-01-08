@@ -1,0 +1,83 @@
+
+group cars
+{
+    normal _x:2;
+    different _f: 2.12;
+
+}
+
+group animals
+{
+    decision _ok:bad;
+}
+
+normal _z:10;
+normal _y:20;
+decision _k:bad;
+
+func par(normal _num, unique _c) -> normal
+{
+    _num:12;
+    give _num;
+}
+
+func prim(normal _numar) -> decision
+{
+    give good;
+}
+
+main_start
+
+    animals _a;
+    normal _b:_a->_x _+_ 4;
+    _const_ unique _c:<a>;
+    normal _nr:2;
+    unique _var; different _f:2.9;
+    _var:<i>;
+    _const_ special _sir:<<Salut>>;
+    normal _num:5;
+    normal _i:1;
+    decision _OK:bad;
+    unique _C:<a>;
+
+    _for_(_i:1;_i leq 5;_i:10)
+    {
+        _i:2;
+    }
+
+    _const_ different _eE:3.4;
+
+    _if_ (_nr eq _num)
+    {
+        _const_ different _F:10.4;
+        _loop_
+        {
+            _nr:5;
+        }
+    }
+    _else_if_ (_nr leq _num)
+    {
+        special _s:<<Hello>>; 
+    }
+    _else_
+    {
+        _while_ (_i neq 10)
+        {
+            unique _char:<z>;
+            _OK:good; 
+            _if_ ((_OK leq 4) eq (_num neq (_nr _+_ _i)))
+            {
+                _stop_;
+            }
+        }
+    }
+
+    normal _j: ((3 _+_ _a->_x) _*_ (_nr _/_ 10));
+    _nr: par(2, impar(4, _C), prim(_a->_x _+_ 4));
+    par(Eval(_i), _num);
+    _a->_f:10.0;
+    decision _test: ((10 leq _z) eq (_num neq 4));
+    
+    give 1;
+
+main_stop

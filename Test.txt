@@ -1,0 +1,7 @@
+normal _x:13;
+
+main_start
+
+    _const_ decision _y:bad;
+
+main_stop
