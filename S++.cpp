@@ -18,4 +18,5 @@ void symbolTable::printTable()
     {
         cout<<"Type: "<<v.type<<" Name: "<<v.name<<" Value: "<<v.value<<" Defined: "<<v.def<<endl;
     }
+    
 }

@@ -65,7 +65,7 @@ extern int yydebug;
     EQUAL = 266,                   /* EQUAL  */
     NOT_EQUAL = 267,               /* NOT_EQUAL  */
     LOWER_EQUAL = 268,             /* LOWER_EQUAL  */
-    RIGHT_EQUAL = 269,             /* RIGHT_EQUAL  */
+    GREAT_EQUAL = 269,             /* GREAT_EQUAL  */
     ASSIGN = 270,                  /* ASSIGN  */
     IMPORT = 271,                  /* IMPORT  */
     NR = 272,                      /* NR  */
@@ -94,7 +94,8 @@ extern int yydebug;
     DEF_FUNC = 295,                /* DEF_FUNC  */
     ID = 296,                      /* ID  */
     STRING = 297,                  /* STRING  */
-    CHAR = 298                     /* CHAR  */
+    CHAR = 298,                    /* CHAR  */
+    RIGHT_EQUAL = 299              /* RIGHT_EQUAL  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -103,12 +104,12 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 21 "S++.y"
+#line 20 "S++.y"
 
      char* string;
      char char_type;
 
-#line 112 "S++.tab.h"
+#line 113 "S++.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

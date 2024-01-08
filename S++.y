@@ -14,7 +14,7 @@ class symbolTable table;
 string current_id;
 string current_value;
 string current_type;
-string current_def="global";
+string current_def;
 %}
 
 %union {
@@ -124,7 +124,7 @@ statements: declarations
 declarations: decl ';'   //pentru declararea/definirea variabilelor
     ;
 
-decl: types ID { table.addVar(current_type, $2, "", current_def); }
+decl: types ID { table.addVar(current_type, $2, "", current_def);  }
     | types ID '[' NR ']' 
     | types assign_statements {table.addVar(current_type, current_id, current_value, current_def);}
     | CONST types assign_statements {table.addVar(string($1)+" "+current_type, current_id, current_value, current_def);}
@@ -136,7 +136,7 @@ assign_statements: left_value ASSIGN expression // statement ul de assignare
 assignments: assign_statements ';'
     ;
 
-left_value: ID {current_id=$1;}
+left_value: ID {current_id=$1;  $$=$1}
     | ID '[' NR ']'
     | ID '-''>' ID
     ;
@@ -191,7 +191,7 @@ if_statement: IF_STATEMENT '(' boolean_expression ')' '{' list_statements '}'   
 
 else_statement: ELSE_IF_STATEMENT '(' boolean_expression ')' '{' list_statements '}' else_statement
                 | ELSE_IF_STATEMENT '(' boolean_expression ')' '{' list_statements '}' 
-                | ELSE_STATEMENT '{' list_statements '}'
+                | ELSE_STATEMENT '{' list_statements '}' 
                 ;
 
 while_statement: WHILE_STATEMENT '(' boolean_expression ')' '{' list_statements '}'    //forma pentru while

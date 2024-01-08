@@ -885,7 +885,7 @@ YY_RULE_SETUP
 case 12:
 YY_RULE_SETUP
 #line 19 "S++.l"
-{return RIGHT_EQUAL;}
+{return GREAT_EQUAL;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
