@@ -14,7 +14,7 @@ class symbolTable table;
 string current_id;
 string current_value;
 string current_type;
-string current_def;
+string current_def="global";
 %}
 
 %union {
@@ -136,7 +136,7 @@ assign_statements: left_value ASSIGN expression // statement ul de assignare
 assignments: assign_statements ';'
     ;
 
-left_value: ID {current_id=$1;  $$=$1}
+left_value: ID {current_id=$1;}
     | ID '[' NR ']'
     | ID '-''>' ID
     ;
@@ -215,7 +215,7 @@ list_calls: expression
 give: GIVE expression ';'    //preocesul de returnare in functii
     ;
 
-export: left_value ';'
+export: left_value ';' 
     | left_value ',' export
 
 %%

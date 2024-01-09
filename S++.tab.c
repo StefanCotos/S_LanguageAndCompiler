@@ -84,7 +84,7 @@ class symbolTable table;
 string current_id;
 string current_value;
 string current_type;
-string current_def;
+string current_def="global";
 
 #line 90 "S++.tab.c"
 
@@ -1399,7 +1399,7 @@ yyreduce:
 
   case 49: /* decl: types ID  */
 #line 127 "S++.y"
-               { table.addVar(current_type, (yyvsp[0].string), "", current_def); }
+               { table.addVar(current_type, (yyvsp[0].string), "", current_def);  }
 #line 1404 "S++.tab.c"
     break;
 
