@@ -45,7 +45,7 @@
 "main_stop" {return MAIN_STOP;}
 
 [_][A-Za-z]+ {yylval.string = strdup(yytext); return ID;}
-[A-Za-z] {yylval.char_type = (strdup(yytext)[0]); return CHAR;}
+[A-Za-z] {yylval.string = (strdup(yytext)); return CHAR;}
 [A-Za-z]+ {yylval.string = strdup(yytext); return STRING;}
 [0-9]+ {yylval.string = strdup(yytext); return NR;}
 

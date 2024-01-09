@@ -1020,7 +1020,7 @@ YY_RULE_SETUP
 case 39:
 YY_RULE_SETUP
 #line 48 "S++.l"
-{yylval.char_type = (strdup(yytext)[0]); return CHAR;}
+{yylval.string = (strdup(yytext)); return CHAR;}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP

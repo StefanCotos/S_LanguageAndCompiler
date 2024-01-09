@@ -1,0 +1,28 @@
+Information about variables:
+Type: normal Name: _x Value: 1 Defined: cars
+Type: different Name: _f Value: 2.12 Defined: cars
+Type: decision Name: _ok Value: bad Defined: animals
+Type: different Name: _ff Value: 1.2 Defined: prim
+Type: normal Name: _z Value: 10 Defined: global
+Type: normal Name: _y Value: 20 Defined: global
+Type: decision Name: _k Value: bad Defined: global
+Type: normal Name: _num Value: 12 Defined: par
+Type: normal Name: _b Value: 4 Defined: main
+Type: _const_ unique Name: _c Value: a Defined: main
+Type: normal Name: _nr Value: 2 Defined: main
+Type: unique Name: _var Value:  Defined: main
+Type: different Name: _f Value: 2.9 Defined: main
+Type: _const_ special Name: _sir Value: Salut Defined: main
+Type: normal Name: _num Value: 5 Defined: main
+Type: normal Name: _i Value: 1 Defined: main
+Type: decision Name: _OK Value: bad Defined: main
+Type: unique Name: _C Value: a Defined: main
+Type: _const_ different Name: _eE Value: 3.4 Defined: main
+Type: _const_ different Name: _F Value: 10.4 Defined: main
+Type: special Name: _s Value: Hello Defined: main
+Type: unique Name: _char Value: z Defined: main
+Type: normal Name: _j Value: 10 Defined: main
+Type: decision Name: _test Value: 4 Defined: main
+Information about functions:
+Name: prim Return type: decision Parameters type: normal  Defined: animals
+Name: par Return type: normal Parameters type: normal unique  Defined: global

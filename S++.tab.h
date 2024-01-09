@@ -104,12 +104,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 20 "S++.y"
+#line 22 "S++.y"
 
      char* string;
-     char char_type;
 
-#line 113 "S++.tab.h"
+#line 112 "S++.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

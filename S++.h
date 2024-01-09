@@ -15,7 +15,7 @@ struct varInfo{
 struct funcInfo{
     string name;
     string returnType;
-    vector<pair<string,string>> parameters;
+    vector<string> parameters;
     string def;
 };
 
@@ -25,5 +25,6 @@ class symbolTable{
 
     public:
     void addVar(string type, string name, string value, string def);
+    void addFunc(string name, string returnType, vector<string> parameters, string def);
     void printTable();
 };

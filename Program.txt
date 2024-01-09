@@ -1,7 +1,7 @@
 
 group cars
 {
-    normal _x:2;
+    normal _x: 1 _+_ 1;
     different _f: 2.12;
 
 }
@@ -9,6 +9,12 @@ group cars
 group animals
 {
     decision _ok:bad;
+    
+    func prim(normal _numar) -> decision
+    {
+        different _ff:1.2;
+        give good;
+    }
 }
 
 normal _z:10;
@@ -17,13 +23,8 @@ decision _k:bad;
 
 func par(normal _num, unique _c) -> normal
 {
-    _num:12;
+    normal _num:12;
     give _num;
-}
-
-func prim(normal _numar) -> decision
-{
-    give good;
 }
 
 main_start

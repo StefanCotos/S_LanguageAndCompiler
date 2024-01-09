@@ -14,19 +14,19 @@ class symbolTable table;
 string current_id;
 string current_value;
 string current_type;
-string current_def="global";
+string current_def_var;
+string current_def_func;
+vector<string> parameters;
 %}
 
 %union {
      char* string;
-     char char_type;
 }
 
 %token  <string>INT_TYPE <string>FLOAT_TYPE <string>CHAR_TYPE <string>STRING_TYPE <string>BOOL_TYPE <string>BOOL_TRUE <string>BOOL_FALSE CLASS EQUAL NOT_EQUAL LOWER_EQUAL GREAT_EQUAL ASSIGN IMPORT <string>NR
         EXPORT GIVE <string>CONST AND OR NOT IF_STATEMENT ELSE_STATEMENT ELSE_IF_STATEMENT WHILE_STATEMENT FOR_STATEMENT LOOP_STATEMENT STOP
         PLUS MINUS MUL DIV MOD EVAL TYPEOF MAIN_START MAIN_STOP DEF_FUNC
-%token<string> ID STRING
-%token<char_type> CHAR
+%token<string> ID STRING CHAR
 
 %left PLUS MINUS
 %left MUL DIV
@@ -44,11 +44,11 @@ string current_def="global";
 program: user_data_types_section global_var_section func_section main {printf("The program is correct!\n");}
      ;
 
-types: INT_TYPE {current_type=$1;}
-     | FLOAT_TYPE {current_type=$1;}
-     | CHAR_TYPE  {current_type=$1;}
-     | STRING_TYPE {current_type=$1;}
-     | BOOL_TYPE  {current_type=$1;}
+types: INT_TYPE {current_type=$1; $$=$1;}
+     | FLOAT_TYPE {current_type=$1; $$=$1;}
+     | CHAR_TYPE  {current_type=$1; $$=$1;}
+     | STRING_TYPE {current_type=$1; $$=$1;}
+     | BOOL_TYPE  {current_type=$1; $$=$1;}
      ;
 
 user_data_types_section: user_data_types_def  // daca exista sau nu aceasta sectiune
@@ -58,10 +58,10 @@ user_data_types_section: user_data_types_def  // daca exista sau nu aceasta sect
 user_data_types_def: user_data_types  // daca exista definesc diferite tipuri
                 | user_data_types user_data_types_def
 
-user_data_types: CLASS STRING '{' list_class '}' {current_def=string($2);}
+user_data_types:  CLASS STRING {current_def_var=string($2); current_def_func=string($2);} '{' list_class '}'
     ;
 
-list_class: class
+list_class: class 
         | class list_class
         ;
 
@@ -69,7 +69,7 @@ class: declarations
     | functions
     ;
 
-global_var_section: global_var {current_def="global";} // daca exista sectiunea de declarare a variabilelor globale
+global_var_section: {current_def_var="global";} global_var  // daca exista sectiunea de declarare a variabilelor globale
                 | /* nothing */
                 ;
 
@@ -77,7 +77,7 @@ global_var: declarations     // daca exista declar/definesc ce variabile globale
         | declarations global_var
         ;
 
-func_section: list_functions  // daca exista sau nu functii
+func_section: {current_def_func="global";} list_functions  // daca exista sau nu functii
             | /* nothing */
             ;
 
@@ -85,8 +85,8 @@ list_functions: functions     // daca exista definesc diferite functii
             | functions list_functions
             ;
 
-functions: DEF_FUNC STRING '(' list_param ')' '-''>' types '{' list_statements '}' {current_def=string($2);}
-        | DEF_FUNC STRING '(' list_param ')'  '{' list_statements '}' {current_def=string($2);}
+functions: DEF_FUNC STRING '(' list_param ')' '-''>' types  {current_def_var=string($2);} '{' list_statements '}' {table.addFunc(string($2),string($8),parameters,current_def_func); parameters.clear();}
+        |  DEF_FUNC STRING '(' list_param ')' {current_def_var=string($2);}  '{' list_statements '}' {table.addFunc(string($2),"none",parameters,current_def_func); parameters.clear();}
         ;
 
 list_param: parameters   //daca functia are sau nu parametrii
@@ -97,10 +97,10 @@ parameters: param
     | param ',' parameters
     ;
 
-param: types ID
+param: types ID {parameters.push_back(string($1));}
     ;
 
-main: MAIN_START list_statements MAIN_STOP {current_def="main";}  // main-ul care trebuie sa exista obligatoriu
+main: {current_def_var="main";} MAIN_START list_statements MAIN_STOP   // main-ul care trebuie sa exista obligatoriu
     ;
 
 list_statements: statements      // tot ce se afla in main si in diferite locuri
@@ -124,10 +124,10 @@ statements: declarations
 declarations: decl ';'   //pentru declararea/definirea variabilelor
     ;
 
-decl: types ID { table.addVar(current_type, $2, "", current_def);  }
+decl: types ID { table.addVar(current_type, $2, "", current_def_var);  }
     | types ID '[' NR ']' 
-    | types assign_statements {table.addVar(current_type, current_id, current_value, current_def);}
-    | CONST types assign_statements {table.addVar(string($1)+" "+current_type, current_id, current_value, current_def);}
+    | types assign_statements {table.addVar(current_type, current_id, current_value, current_def_var);}
+    | CONST types assign_statements {table.addVar(string($1)+" "+current_type, current_id, current_value, current_def_var);}
     ;
 
 assign_statements: left_value ASSIGN expression // statement ul de assignare
@@ -143,8 +143,8 @@ left_value: ID {current_id=$1;}
 
 value: NR   {current_value=$1;}     //diferite valori ce pot fii atribuite variabilelor/functiilor etc.
     | NR '.' NR  {current_value=string($1)+"."+string($3);}
-    | '<''<' STRING '>''>'  {current_value="<<"+string($3)+">>";}
-    | '<' CHAR '>' 
+    | '<''<' STRING '>''>'  {current_value=string($3);}
+    | '<' CHAR '>' {current_value=string($2);}
     | ID '[' NR ']' {current_value=string($1)+"["+string($3)+"]";}
     | ID {current_value=$1;} 
     | func_call 
@@ -155,7 +155,7 @@ expression: arithmetic_expression   //tipurile de expresii
         | boolean_expression
         ;
 
-arithmetic_expression: value PLUS arithmetic_expression 
+arithmetic_expression: value PLUS arithmetic_expression
         |  value MINUS arithmetic_expression
         |  value MUL arithmetic_expression
         |  value DIV arithmetic_expression
