@@ -10,13 +10,15 @@
 "unique" {yylval.string = strdup(yytext); return CHAR_TYPE;}
 "special" {yylval.string = strdup(yytext); return STRING_TYPE;}
 "decision" {yylval.string = strdup(yytext); return BOOL_TYPE;}
-"good" {yylval.string = strdup(yytext); return BOOL_TRUE;}
-"bad" {yylval.string = strdup(yytext); return BOOL_FALSE;}
+"true" {yylval.string = strdup(yytext); return BOOL_TRUE;}
+"false" {yylval.string = strdup(yytext); return BOOL_FALSE;}
 "group" {return CLASS;}
 "eq" {return EQUAL;}
 "neq" {return NOT_EQUAL;}
+"low" {return LOWER;}
+"great" {return GREATER;}
 "leq" {return LOWER_EQUAL;}
-"geq" {return GREAT_EQUAL;}
+"geq" {return GREATER_EQUAL;}
 ":" {return ASSIGN;}
 "import" {return IMPORT;} // cin
 "export" {return EXPORT;} // cout
@@ -32,11 +34,11 @@
 "_for_" {return FOR_STATEMENT;}
 "_loop_" {return LOOP_STATEMENT;}
 "_stop_" {return STOP;}
-"_+_" {return PLUS;}
-"_-_" {return MINUS;}
-"_*_" {return MUL;}
-"_/_" {return DIV;}
-"_%_" {return MOD;}
+"_+_" {yylval.string = strdup(yytext); return PLUS;}
+"_-_" {yylval.string = strdup(yytext); return MINUS;}
+"_*_" {yylval.string = strdup(yytext); return MUL;}
+"_/_" {yylval.string = strdup(yytext); return DIV;}
+"_%_" {yylval.string = strdup(yytext); return MOD;}
 "Eval" {return EVAL;}
 "TypeOf" {return TYPEOF;}
 "func" {return DEF_FUNC;}
@@ -48,6 +50,7 @@
 [A-Za-z] {yylval.string = (strdup(yytext)); return CHAR;}
 [A-Za-z]+ {yylval.string = strdup(yytext); return STRING;}
 [0-9]+ {yylval.string = strdup(yytext); return NR;}
+"'"[^\n']*"'" { yylval.string = strdup(yytext+1);  return STRING_LITERAL; }
 
 [ \t] ;
 "\r"|"\n"|"\r\n" {yylineno++;}

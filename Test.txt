@@ -1,7 +1,20 @@
 normal _x:13;
+_const_ normal _t:10;
+different _F: 10.4;
+
+
+func nr(normal _z, different _f) -> normal
+{
+    special _str:<<HelloWorld>>;
+    give 6;
+}
 
 main_start
 
-    _const_ decision _y:bad;
+    normal _w: 3 _+_ (10 _%_ 2) _+_ 4 ;
+    _const_ different _y: 8.4;
+    decision _ok:true;
+    different _fF: 15 _-_ 2.3 _+_ 3.1;
+    
 
 main_stop

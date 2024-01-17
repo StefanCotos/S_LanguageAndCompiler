@@ -64,38 +64,41 @@ extern int yydebug;
     CLASS = 265,                   /* CLASS  */
     EQUAL = 266,                   /* EQUAL  */
     NOT_EQUAL = 267,               /* NOT_EQUAL  */
-    LOWER_EQUAL = 268,             /* LOWER_EQUAL  */
-    GREAT_EQUAL = 269,             /* GREAT_EQUAL  */
-    ASSIGN = 270,                  /* ASSIGN  */
-    IMPORT = 271,                  /* IMPORT  */
-    NR = 272,                      /* NR  */
-    EXPORT = 273,                  /* EXPORT  */
-    GIVE = 274,                    /* GIVE  */
-    CONST = 275,                   /* CONST  */
-    AND = 276,                     /* AND  */
-    OR = 277,                      /* OR  */
-    NOT = 278,                     /* NOT  */
-    IF_STATEMENT = 279,            /* IF_STATEMENT  */
-    ELSE_STATEMENT = 280,          /* ELSE_STATEMENT  */
-    ELSE_IF_STATEMENT = 281,       /* ELSE_IF_STATEMENT  */
-    WHILE_STATEMENT = 282,         /* WHILE_STATEMENT  */
-    FOR_STATEMENT = 283,           /* FOR_STATEMENT  */
-    LOOP_STATEMENT = 284,          /* LOOP_STATEMENT  */
-    STOP = 285,                    /* STOP  */
-    PLUS = 286,                    /* PLUS  */
-    MINUS = 287,                   /* MINUS  */
-    MUL = 288,                     /* MUL  */
-    DIV = 289,                     /* DIV  */
-    MOD = 290,                     /* MOD  */
-    EVAL = 291,                    /* EVAL  */
-    TYPEOF = 292,                  /* TYPEOF  */
-    MAIN_START = 293,              /* MAIN_START  */
-    MAIN_STOP = 294,               /* MAIN_STOP  */
-    DEF_FUNC = 295,                /* DEF_FUNC  */
-    ID = 296,                      /* ID  */
-    STRING = 297,                  /* STRING  */
-    CHAR = 298,                    /* CHAR  */
-    RIGHT_EQUAL = 299              /* RIGHT_EQUAL  */
+    LOWER = 268,                   /* LOWER  */
+    GREATER = 269,                 /* GREATER  */
+    LOWER_EQUAL = 270,             /* LOWER_EQUAL  */
+    GREATER_EQUAL = 271,           /* GREATER_EQUAL  */
+    ASSIGN = 272,                  /* ASSIGN  */
+    IMPORT = 273,                  /* IMPORT  */
+    NR = 274,                      /* NR  */
+    EXPORT = 275,                  /* EXPORT  */
+    GIVE = 276,                    /* GIVE  */
+    CONST = 277,                   /* CONST  */
+    AND = 278,                     /* AND  */
+    OR = 279,                      /* OR  */
+    NOT = 280,                     /* NOT  */
+    IF_STATEMENT = 281,            /* IF_STATEMENT  */
+    ELSE_STATEMENT = 282,          /* ELSE_STATEMENT  */
+    ELSE_IF_STATEMENT = 283,       /* ELSE_IF_STATEMENT  */
+    WHILE_STATEMENT = 284,         /* WHILE_STATEMENT  */
+    FOR_STATEMENT = 285,           /* FOR_STATEMENT  */
+    LOOP_STATEMENT = 286,          /* LOOP_STATEMENT  */
+    STOP = 287,                    /* STOP  */
+    PLUS = 288,                    /* PLUS  */
+    MINUS = 289,                   /* MINUS  */
+    MUL = 290,                     /* MUL  */
+    DIV = 291,                     /* DIV  */
+    MOD = 292,                     /* MOD  */
+    EVAL = 293,                    /* EVAL  */
+    TYPEOF = 294,                  /* TYPEOF  */
+    MAIN_START = 295,              /* MAIN_START  */
+    MAIN_STOP = 296,               /* MAIN_STOP  */
+    DEF_FUNC = 297,                /* DEF_FUNC  */
+    STRING_LITERAL = 298,          /* STRING_LITERAL  */
+    ID = 299,                      /* ID  */
+    STRING = 300,                  /* STRING  */
+    CHAR = 301,                    /* CHAR  */
+    RIGHT_EQUAL = 302              /* RIGHT_EQUAL  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -104,11 +107,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 22 "S++.y"
+#line 29 "S++.y"
 
-     char* string;
+    const char* string;
 
-#line 112 "S++.tab.h"
+#line 115 "S++.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

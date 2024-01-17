@@ -2,7 +2,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "S++.h"
+using namespace std;
 
 extern FILE* yyin;
 extern char* yytext;
@@ -17,26 +21,29 @@ string current_type;
 string current_def_var;
 string current_def_func;
 vector<string> parameters;
+string current;
+
+
 %}
 
 %union {
-     char* string;
+    const char* string;
 }
 
-%token  <string>INT_TYPE <string>FLOAT_TYPE <string>CHAR_TYPE <string>STRING_TYPE <string>BOOL_TYPE <string>BOOL_TRUE <string>BOOL_FALSE CLASS EQUAL NOT_EQUAL LOWER_EQUAL GREAT_EQUAL ASSIGN IMPORT <string>NR
+%token  <string>INT_TYPE <string>FLOAT_TYPE <string>CHAR_TYPE <string>STRING_TYPE <string>BOOL_TYPE <string>BOOL_TRUE <string>BOOL_FALSE CLASS 
+        EQUAL NOT_EQUAL LOWER GREATER LOWER_EQUAL GREATER_EQUAL ASSIGN IMPORT <string>NR
         EXPORT GIVE <string>CONST AND OR NOT IF_STATEMENT ELSE_STATEMENT ELSE_IF_STATEMENT WHILE_STATEMENT FOR_STATEMENT LOOP_STATEMENT STOP
-        PLUS MINUS MUL DIV MOD EVAL TYPEOF MAIN_START MAIN_STOP DEF_FUNC
+        <string>PLUS <string>MINUS <string>MUL <string>DIV <string>MOD EVAL TYPEOF MAIN_START MAIN_STOP DEF_FUNC <string>STRING_LITERAL '(' ')'
 %token<string> ID STRING CHAR
 
 %left PLUS MINUS
-%left MUL DIV
+%left MUL DIV MOD
 %left EQUAL NOT_EQUAL
 %left LOWER_EQUAL RIGHT_EQUAL
 %left AND
 %left OR
 %right NOT
-%type<string> types 
-
+%type<string> types left_value  func_call value expression arithmetic_expression boolean_expression
 
 %start program
 
@@ -126,8 +133,8 @@ declarations: decl ';'   //pentru declararea/definirea variabilelor
 
 decl: types ID { table.addVar(current_type, $2, "", current_def_var);  }
     | types ID '[' NR ']' 
-    | types assign_statements {table.addVar(current_type, current_id, current_value, current_def_var);}
-    | CONST types assign_statements {table.addVar(string($1)+" "+current_type, current_id, current_value, current_def_var);}
+    | types ID ASSIGN expression { table.addVar(current_type, $2, $4, current_def_var);}
+    | CONST types ID ASSIGN expression {table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);}
     ;
 
 assign_statements: left_value ASSIGN expression // statement ul de assignare
@@ -136,50 +143,46 @@ assign_statements: left_value ASSIGN expression // statement ul de assignare
 assignments: assign_statements ';'
     ;
 
-left_value: ID {current_id=$1;}
+left_value: ID //{current_id=$1;}
     | ID '[' NR ']'
     | ID '-''>' ID
     ;
 
-value: NR   {current_value=$1;}     //diferite valori ce pot fii atribuite variabilelor/functiilor etc.
-    | NR '.' NR  {current_value=string($1)+"."+string($3);}
-    | '<''<' STRING '>''>'  {current_value=string($3);}
-    | '<' CHAR '>' {current_value=string($2);}
-    | ID '[' NR ']' {current_value=string($1)+"["+string($3)+"]";}
-    | ID {current_value=$1;} 
+value: NR   {$$=$1;}     //diferite valori ce pot fii atribuite variabilelor/functiilor etc.
+    | NR '.' NR  {current_value=string($1)+"."+string($3); $$=current_value.c_str();}
+    | '<''<' STRING '>''>'  {current_value=string($3); $$=current_value.c_str();}
+    | '<' CHAR '>' {current_value=string($2);$$=current_value.c_str();}
+    | ID '[' NR ']' {current_value=string($1)+"["+string($3)+"]";  $$=current_value.c_str();}
+    | ID {current_value=$1; $$=$1;} 
     | func_call 
-    | ID '-''>' ID {current_value=string($1)+"->"+string($4);}
+    | ID '-''>' ID {current_value=string($1)+"->"+string($4); $$=current_value.c_str();}
     ;
 
-expression: arithmetic_expression   //tipurile de expresii
-        | boolean_expression
+expression: arithmetic_expression {$$=$1;}  //tipurile de expresii
+        | boolean_expression {$$=$1;}
         ;
 
-arithmetic_expression: value PLUS arithmetic_expression
-        |  value MINUS arithmetic_expression
-        |  value MUL arithmetic_expression
-        |  value DIV arithmetic_expression
-        |  value MOD arithmetic_expression
-        | '(' arithmetic_expression ')' PLUS arithmetic_expression
-        | '(' arithmetic_expression ')' MINUS arithmetic_expression
-        | '(' arithmetic_expression ')' MUL arithmetic_expression
-        | '(' arithmetic_expression ')' DIV arithmetic_expression
-        | '(' arithmetic_expression ')' MOD arithmetic_expression
-        |  value 
-        | '(' arithmetic_expression ')' 
+
+arithmetic_expression: arithmetic_expression PLUS arithmetic_expression { current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+        |  arithmetic_expression MINUS arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+        |  arithmetic_expression MUL arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+        |  arithmetic_expression DIV arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+        |  arithmetic_expression MOD arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+        |  value {$$=$1; }
+        | '(' arithmetic_expression ')' {current="("+string($2)+")"; $$=current.c_str();}
         ;
 
 boolean_expression: arithmetic_expression EQUAL arithmetic_expression
                  | arithmetic_expression NOT_EQUAL arithmetic_expression
+                 | arithmetic_expression LOWER arithmetic_expression
+                 | arithmetic_expression GREATER arithmetic_expression
                  | arithmetic_expression LOWER_EQUAL arithmetic_expression
-                 | arithmetic_expression GREAT_EQUAL arithmetic_expression
+                 | arithmetic_expression GREATER_EQUAL arithmetic_expression
                  | '(' boolean_expression ')' EQUAL boolean_expression
                  | '(' boolean_expression ')' NOT_EQUAL boolean_expression
-                 | '(' boolean_expression ')' LOWER_EQUAL boolean_expression
-                 | '(' boolean_expression ')' GREAT_EQUAL boolean_expression
                  | '(' boolean_expression ')' AND boolean_expression
                  | '(' boolean_expression ')' OR boolean_expression
-                 | NOT expression
+                 | NOT boolean_expression
                  | '(' boolean_expression ')'
                  | BOOL_TRUE {current_value=$1;}
                  | BOOL_FALSE {current_value=$1;}
