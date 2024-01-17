@@ -59,11 +59,11 @@ vector<Tokens> lexing(const string &input)
         {
             str.push_back(*elements);
             elements++;
-            if(*elements=='+' || *elements=='-' || *elements=='*' || *elements=='/' || *elements=='%')
+            if (*elements == '+' || *elements == '-' || *elements == '*' || *elements == '/' || *elements == '%')
             {
                 str.push_back(*elements);
                 elements++;
-                if(*elements=='_')
+                if (*elements == '_')
                     str.push_back(*elements);
                 else
                     throw runtime_error("Eroare: Expresie incorecta!");
@@ -123,11 +123,11 @@ vector<Tokens> lexing_bool(const string &input)
         {
             str.push_back(*elements);
             elements++;
-            if(*elements=='+' || *elements=='-' || *elements=='*' || *elements=='/' || *elements=='%' || *elements=='&' || *elements=='|' || *elements=='!')
+            if (*elements == '+' || *elements == '-' || *elements == '*' || *elements == '/' || *elements == '%' || *elements == '&' || *elements == '|' || *elements == '!')
             {
                 str.push_back(*elements);
                 elements++;
-                if(*elements=='_')
+                if (*elements == '_')
                     str.push_back(*elements);
                 else
                     throw runtime_error("Eroare: Expresie incorecta!");
@@ -141,14 +141,14 @@ vector<Tokens> lexing_bool(const string &input)
         }
         case 'a' ... 'z':
         {
-            while (elements != input.end() && (*elements>='a' && *elements<='z'))
+            while (elements != input.end() && (*elements >= 'a' && *elements <= 'z'))
             {
                 str.push_back(*elements);
                 elements++;
             }
-            if(str=="eq" || str=="neq" || str=="leq" || str=="geq" || str=="low" || str=="great")
+            if (str == "eq" || str == "neq" || str == "leq" || str == "geq" || str == "low" || str == "great")
                 tokens.push_back(Tokens(TokenType::Operator, str));
-            else if(str=="true" || str=="false")
+            else if (str == "true" || str == "false")
                 tokens.push_back(Tokens(TokenType::Operand, str));
             else
                 throw runtime_error("Eroare: Expresie incorecta!");
@@ -193,9 +193,9 @@ int get_precedence_bool(string op)
         return 1;
     else if (op == "_*_" || op == "_/_" || op == "_%_")
         return 2;
-    else if (op=="eq" || op=="neq" || op=="leq" || op=="geq" || op=="low" || op=="great")
+    else if (op == "eq" || op == "neq" || op == "leq" || op == "geq" || op == "low" || op == "great")
         return 3;
-    else if (op=="_&_" || op=="_|_")
+    else if (op == "_&_" || op == "_|_")
         return 4;
     else
         return 0;
@@ -317,6 +317,12 @@ Operations parse_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_it
         else
             throw runtime_error("Eroare: Paranteza nu s-a inchis!");
     }
+    // else if (tokens_iter->value=="_!_")
+    // {
+    //     tokens_iter++;
+    //     auto expr = parse_expression_bool(tokens, tokens_iter);
+    //     return expr;
+    // }
     else
         throw std::runtime_error("Eroare: Token incorect!");
 }
@@ -324,36 +330,36 @@ Operations parse_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_it
 Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_iter)
 {
     Operations expr;
-    if(tokens_iter->value=="_!_")
-    {
-        expr.value=tokens_iter->value;
-        expr.type=tokens_iter->type;
-        tokens_iter++;
-        auto left_expr= parse_bool(tokens, tokens_iter);
-        expr.left_expr= make_unique<Operations>(move(left_expr));
-    }
-    else if (tokens.size() == 1)
+    Operations new_expr;
+
+    if (tokens.size() == 1)
     {
         auto left_expr = parse_bool(tokens, tokens_iter);
         expr = move(left_expr);
     }
     else
     {
-        auto left_expr = parse_bool(tokens, tokens_iter);
-        // cout<<left_expr.value;
+        Operations left_expr;
+        if (tokens_iter->value == "_!_")
+        {
+            expr.value = tokens_iter->value;
+            expr.type = tokens_iter->type;
+            tokens_iter++;
+            left_expr = parse_bool(tokens, tokens_iter);
+            expr.left_expr = make_unique<Operations>(move(left_expr));
+        }
+        else
+            left_expr = parse_bool(tokens, tokens_iter);
         tokens_iter++;
         while (tokens_iter != tokens.end())
         {
             if (tokens_iter->type == TokenType::Operator)
             {
-                Operations new_expr;
                 auto token_value = tokens_iter->value;
                 auto token_type = tokens_iter->type;
-                // cout<<token;
                 auto precedence = get_precedence_bool(tokens_iter->value);
                 tokens_iter++;
                 auto right_expr = parse_bool(tokens, tokens_iter);
-                // cout<<right_expr.value;
                 tokens_iter++;
 
                 while (tokens_iter != tokens.end())
@@ -362,7 +368,6 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
                     {
                         auto next_token_value = tokens_iter->value;
                         auto next_token_type = tokens_iter->type;
-                        // cout<<next_token;
                         auto next_precedence = get_precedence_bool(tokens_iter->value);
                         if (next_precedence > precedence)
                         {
@@ -411,7 +416,6 @@ Operations parsing_bool(vector<Tokens> tokens)
     return parse_expression_bool(tokens, tokens_iter);
 }
 
-
 void preorder(const Operations &node)
 {
     std::cout << node.value << "(" << node.type << ")"
@@ -447,7 +451,7 @@ int result_int(const Operations &node)
         }
         return result_int(*node.left_expr) / right_value;
     }
-    else if(node.value == "_%_")
+    else if (node.value == "_%_")
         return result_int(*node.left_expr) % result_int(*node.right_expr);
     else
     {
@@ -480,6 +484,86 @@ float result_float(const Operations &node)
     }
 }
 
+int result_bool(const Operations &node)
+{
+    if (node.type == 0 && node.value == "true")
+        return true;
+    else if (node.type == 0 && node.value == "false")
+        return false;
+    else if (node.type == 0)
+        return stoi(node.value);
+    else if (node.value == "_+_")
+        return result_int(*node.left_expr) + result_int(*node.right_expr);
+    else if (node.value == "_-_")
+        return result_int(*node.left_expr) - result_int(*node.right_expr);
+    else if (node.value == "_*_")
+        return result_int(*node.left_expr) * result_int(*node.right_expr);
+    else if (node.value == "_/_")
+    {
+        double right_value = result_int(*node.right_expr);
+        if (right_value == 0)
+        {
+            throw std::runtime_error("Eroare: Impărțire la zero!");
+        }
+        return result_int(*node.left_expr) / right_value;
+    }
+    else if (node.value == "_%_")
+        return result_int(*node.left_expr) % result_int(*node.right_expr);
+    else if (node.value == "eq")
+    {
+        if (result_bool(*node.left_expr) == result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "neq")
+    {
+        if (result_bool(*node.left_expr) != result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "low")
+    {
+        if (result_bool(*node.left_expr) < result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "great")
+    {
+        if (result_bool(*node.left_expr) > result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "leq")
+    {
+        if (result_bool(*node.left_expr) <= result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "geq")
+    {
+        if (result_bool(*node.left_expr) >= result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "_&_")
+    {
+        if (result_bool(*node.left_expr) && result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "_|_")
+    {
+        if (result_bool(*node.left_expr) || result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "_!_")
+        return !(result_bool(*node.left_expr));
+    else
+    {
+        throw runtime_error("Eroare: Operator necunoscut!");
+    }
+}
 
 int main()
 {
@@ -496,7 +580,7 @@ int main()
     cout << "Rezultatul:" << result_int(expr);
     cout << endl;*/
 
-    string input= "(3 low 5) eq true neq false";
+    string input = "_!_ (3 neq 2)";
     auto t = lexing_bool(input);
     for (auto token : t)
     {
@@ -505,6 +589,13 @@ int main()
     }
     auto expr = parsing_bool(t);
     preorder(expr);
+    cout << endl;
+    string res;
+    if (result_bool(expr) == 1)
+        res = "true";
+    else
+        res = "false";
+    cout << "Rezultatul:" << res;
     cout << endl;
 
     return 0;

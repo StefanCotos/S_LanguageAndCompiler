@@ -78,5 +78,15 @@ public:
     void addVar(string type, string name, string value, string def);
     void addFunc(string name, string returnType, vector<string> parameters, string def);
     void printTable();
+    string varName(string msg);  
+    string varType(string msg);  
+    string varVal(string msg);   
+    string varDef(string msg);   
+    string funcName(string msg); 
+    string funcType(string msg); 
+    string funcPar(string msg);  
+    string funcDef(string msg);  
 };
 
+
+void yyerror(const string &s);

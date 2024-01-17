@@ -5,14 +5,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
+#include <set>
 #include "S++.h"
 using namespace std;
+
+set<string> definedVariables;
+set<string> definedFunctions;
 
 extern FILE* yyin;
 extern char* yytext;
 extern int yylineno;
 extern int yylex();
-void yyerror(const char * s);
+void yyerror(const string& s);
+int countWords(const string& input);
+string inputType(const string& s);
 class symbolTable table;
 
 string current_id;
@@ -20,9 +27,15 @@ string current_value;
 string current_type;
 string current_def_var;
 string current_def_func;
+string funcparam;
 vector<string> parameters;
 string current;
 
+bool isInteger(const string& s);
+bool isFloat(const string& s);
+bool isChar(const string& s);
+bool isBool(const string& s);
+bool isString(const string& s);
 
 %}
 
@@ -92,8 +105,8 @@ list_functions: functions     // daca exista definesc diferite functii
             | functions list_functions
             ;
 
-functions: DEF_FUNC STRING '(' list_param ')' '-''>' types  {current_def_var=string($2);} '{' list_statements '}' {table.addFunc(string($2),string($8),parameters,current_def_func); parameters.clear();}
-        |  DEF_FUNC STRING '(' list_param ')' {current_def_var=string($2);}  '{' list_statements '}' {table.addFunc(string($2),"none",parameters,current_def_func); parameters.clear();}
+functions: DEF_FUNC STRING '(' list_param ')' '-''>' types  {current_def_var=string($2);} '{' list_statements '}' {table.addFunc(string($2),string($8),parameters,current_def_func); parameters.clear(); definedFunctions.insert($2);}
+        |  DEF_FUNC STRING '(' list_param ')' {current_def_var=string($2);}  '{' list_statements '}' {table.addFunc(string($2),"none",parameters,current_def_func); parameters.clear();  definedFunctions.insert($2);}
         ;
 
 list_param: parameters   //daca functia are sau nu parametrii
@@ -131,10 +144,27 @@ statements: declarations
 declarations: decl ';'   //pentru declararea/definirea variabilelor
     ;
 
-decl: types ID { table.addVar(current_type, $2, "", current_def_var);  }
-    | types ID '[' NR ']' 
-    | types ID ASSIGN expression { table.addVar(current_type, $2, $4, current_def_var);}
-    | CONST types ID ASSIGN expression {table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);}
+decl: types ID { if(table.varName($2)!="NULL")
+                {
+                    yyerror("The variable is already defined!");
+                }
+                table.addVar(current_type, $2, "", current_def_var);  }
+    | types ID '[' NR ']' {if(table.varName($2)!="NULL")
+                        {
+                            yyerror("The variable is already defined!");
+                        }
+                        table.addVar(current_type, $2, "undefined", current_def_var);}
+    | types ID ASSIGN expression { if(table.varName($2)!="NULL")
+                                    {
+                                        yyerror("The variable is already defined!");
+                                    } 
+                                    table.addVar(current_type, $2, $4, current_def_var);}
+    | CONST types ID ASSIGN expression {
+                                    if(table.varName($2)!="NULL")
+                                        {
+                                            yyerror("The variable is already defined!");
+                                        } 
+                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);}
     ;
 
 assign_statements: left_value ASSIGN expression // statement ul de assignare
@@ -143,8 +173,12 @@ assign_statements: left_value ASSIGN expression // statement ul de assignare
 assignments: assign_statements ';'
     ;
 
-left_value: ID //{current_id=$1;}
-    | ID '[' NR ']'
+left_value: ID {current_id=$1;
+                 if (table.varName(current_id) == "NULL")
+                {
+                    yyerror("Variable not defined!");
+                }}
+    | ID '[' NR ']' 
     | ID '-''>' ID
     ;
 
@@ -154,7 +188,7 @@ value: NR   {$$=$1;}     //diferite valori ce pot fii atribuite variabilelor/fun
     | '<' CHAR '>' {current_value=string($2);$$=current_value.c_str();}
     | ID '[' NR ']' {current_value=string($1)+"["+string($3)+"]";  $$=current_value.c_str();}
     | ID {current_value=$1; $$=$1;} 
-    | func_call 
+    | func_call {$$=$1;}
     | ID '-''>' ID {current_value=string($1)+"->"+string($4); $$=current_value.c_str();}
     ;
 
@@ -205,13 +239,81 @@ for_statement: FOR_STATEMENT '(' assign_statements ';' boolean_expression ';' as
 
 loop_statement: LOOP_STATEMENT '{' list_statements '}'   // forma pentru loop
 
-func_call: STRING '(' list_calls ')'  // apelurile de functii
+func_call: STRING '(' list_calls ')' {  $$=$1;
+                                        if (definedFunctions.find($1) == definedFunctions.end()) 
+                                        {
+                                            yyerror("Function not defined: " + string($1));
+                                        }  
+                                        else{ if (!funcparam.empty()) 
+                                            {
+                                                funcparam.erase(funcparam.size() - 1);
+                                            }
+                                        int poz=0;
+                                        while(poz!=-1)
+                                        {
+                                            poz=funcparam.find("_const_");
+                                            if(poz!=-1)
+                                                funcparam.replace(poz,8,"");
+                                        }
+                                        string numeFunc = $1;
+                                        string paramDef = table.funcPar(numeFunc);
+                                        string paramCall = funcparam;
+
+                                        int nrParDef=countWords(paramDef);
+                                        int nrParCall=countWords(paramCall);
+                                        cout<<paramDef<<endl;
+                                        cout<<paramCall<<endl;
+                                        if(nrParDef!=nrParCall)
+                                            {
+                                                yyerror("Incorrect number of parameters in function call: " + numeFunc);
+                                            }
+                                        else if (paramDef != paramCall) 
+                                            { 
+                                                
+                                                yyerror("The variables have the wrong type in function call: " + numeFunc);
+                                            }
+
+                                        funcparam = "";}} // apelurile de functii
         | EVAL '(' expression ')'
         | TYPEOF '(' expression ')'
         ;
 
-list_calls: expression
-        |   expression ',' list_calls
+list_calls: expression  {
+                        if(isInteger($1)==true)
+                            {funcparam = "normal " + funcparam;}
+                        else if(isFloat($1)==true)
+                            {funcparam = "different " + funcparam;}
+                        else if(isChar($1)==true)
+                            {funcparam = "unique " + funcparam;}
+                        else if(isBool($1)==true)
+                            {funcparam = "decision " + funcparam;}
+                        else if(isString($1)==true && table.funcName($1)=="NULL")
+                            {funcparam = "special " + funcparam;}
+                        else if(table.varType($1)!="NULL")
+                            {funcparam = table.varType($1) + " " + funcparam;} 
+                        else if(table.funcType($1)!="NULL")
+                            {funcparam = table.funcType($1) + " " + funcparam;} 
+                        else
+                            {yyerror("Variable/function not defined: " + string($1));}
+                        }
+        |   expression ',' list_calls {
+                                     if(isInteger($1)==true)
+                                        {funcparam = "normal " + funcparam;}
+                                    else if(isFloat($1)==true)
+                                        {funcparam = "different " + funcparam;}
+                                    else if(isChar($1)==true)
+                                        {funcparam = "unique " + funcparam;}
+                                    else if(isBool($1)==true)
+                                        {funcparam = "decision " + funcparam;}
+                                    else if(isString($1)==true && table.funcName($1)=="NULL")
+                                        {funcparam = "special " + funcparam;}
+                                    else if(table.varType($1)!="NULL")
+                                        {funcparam = table.varType($1) + " " + funcparam;} 
+                                    else if(table.funcType($1)!="NULL")
+                                        {funcparam = table.funcType($1) + " " + funcparam;} 
+                                    else
+                                        {yyerror("Variable/function not defined: " + string($1));}
+                            }
         |   /* nothing */
         ;
 
@@ -222,8 +324,112 @@ export: left_value ';'
     | left_value ',' export
 
 %%
-void yyerror(const char * s){
-    printf("error: %s at line:%d\n",s,yylineno);
+void yyerror(const string& s){
+    cout<<"error: "<<s<<" at line: "<<yylineno<<endl;
+    exit(EXIT_FAILURE);
+}
+
+string Eval(const string& input)
+{
+    return "";
+}
+
+string TypeOf(const string& input)
+{
+    return "";
+}
+
+int countWords(const string& input) 
+{
+    int wordCount = 0;
+    bool inWord = false;
+
+    for (char ch : input)
+    {
+        if (isspace(ch))
+        {
+            if (inWord)
+            {
+                inWord = false;
+                wordCount++;
+            }
+        }
+        else
+        {
+            inWord = true;
+        }
+    }
+
+    if (inWord)
+    {
+        wordCount++;
+    }
+
+    return wordCount;
+}
+
+bool isInteger(const string& s)
+{
+    try {
+        int nr=stoi(s);
+        if(s==to_string(nr))
+            return true;
+        else
+            return false;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool isFloat(const string& s)
+{
+    try {
+        stof(s);
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool isChar(const string& s)
+{
+    if(s.length() == 1 )
+        return true;
+    else 
+        return false; 
+}
+
+bool isBool(const string& s)
+{
+    if(s == "true" || s == "false")
+        return true;
+    else return false;
+}
+
+bool isString(const string& s)
+{
+    if(s[0]!='_' && s.length()>1)
+        return true;
+    else return false;
+}
+
+string inputType(const string& s) 
+{
+
+    // Verificare tipului
+    if (isInteger(s)) {
+        return "normal";
+    } else if (isFloat(s)) {
+        return "different";
+    } else if (isChar(s)) {
+        return "unique";
+    } else if (isBool(s)) {
+        return "decision";
+    } else {
+        return "special";
+    }
+
+    return 0;
 }
 
 int main(int argc, char** argv){

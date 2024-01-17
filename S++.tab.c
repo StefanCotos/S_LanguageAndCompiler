@@ -75,14 +75,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
+#include <set>
 #include "S++.h"
 using namespace std;
+
+set<string> definedVariables;
+set<string> definedFunctions;
 
 extern FILE* yyin;
 extern char* yytext;
 extern int yylineno;
 extern int yylex();
-void yyerror(const char * s);
+void yyerror(const string& s);
+int countWords(const string& input);
+string inputType(const string& s);
 class symbolTable table;
 
 string current_id;
@@ -90,12 +97,18 @@ string current_value;
 string current_type;
 string current_def_var;
 string current_def_func;
+string funcparam;
 vector<string> parameters;
 string current;
 
+bool isInteger(const string& s);
+bool isFloat(const string& s);
+bool isChar(const string& s);
+bool isBool(const string& s);
+bool isString(const string& s);
 
 
-#line 99 "S++.tab.c"
+#line 112 "S++.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -614,20 +627,20 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
-       0,    51,    51,    54,    55,    56,    57,    58,    61,    62,
-      65,    66,    68,    68,    71,    72,    75,    76,    79,    79,
-      80,    83,    84,    87,    87,    88,    91,    92,    95,    95,
-      96,    96,    99,   100,   103,   104,   107,   110,   110,   113,
-     114,   116,   117,   118,   119,   120,   121,   122,   123,   124,
-     125,   126,   127,   128,   131,   134,   135,   136,   137,   140,
-     143,   146,   147,   148,   151,   152,   153,   154,   155,   156,
-     157,   158,   161,   162,   166,   167,   168,   169,   170,   171,
-     172,   175,   176,   177,   178,   179,   180,   181,   182,   183,
-     184,   185,   186,   187,   188,   191,   192,   195,   196,   197,
-     200,   203,   206,   208,   209,   210,   213,   214,   215,   218,
-     221,   222
+       0,    64,    64,    67,    68,    69,    70,    71,    74,    75,
+      78,    79,    81,    81,    84,    85,    88,    89,    92,    92,
+      93,    96,    97,   100,   100,   101,   104,   105,   108,   108,
+     109,   109,   112,   113,   116,   117,   120,   123,   123,   126,
+     127,   129,   130,   131,   132,   133,   134,   135,   136,   137,
+     138,   139,   140,   141,   144,   147,   152,   157,   162,   170,
+     173,   176,   181,   182,   185,   186,   187,   188,   189,   190,
+     191,   192,   195,   196,   200,   201,   202,   203,   204,   205,
+     206,   209,   210,   211,   212,   213,   214,   215,   216,   217,
+     218,   219,   220,   221,   222,   225,   226,   229,   230,   231,
+     234,   237,   240,   242,   277,   278,   281,   299,   317,   320,
+     323,   324
 };
 #endif
 
@@ -1354,223 +1367,348 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: user_data_types_section global_var_section func_section main  */
-#line 51 "S++.y"
+#line 64 "S++.y"
                                                                       {printf("The program is correct!\n");}
-#line 1360 "S++.tab.c"
+#line 1373 "S++.tab.c"
     break;
 
   case 3: /* types: INT_TYPE  */
-#line 54 "S++.y"
+#line 67 "S++.y"
                 {current_type=(yyvsp[0].string); (yyval.string)=(yyvsp[0].string);}
-#line 1366 "S++.tab.c"
+#line 1379 "S++.tab.c"
     break;
 
   case 4: /* types: FLOAT_TYPE  */
-#line 55 "S++.y"
+#line 68 "S++.y"
                   {current_type=(yyvsp[0].string); (yyval.string)=(yyvsp[0].string);}
-#line 1372 "S++.tab.c"
+#line 1385 "S++.tab.c"
     break;
 
   case 5: /* types: CHAR_TYPE  */
-#line 56 "S++.y"
+#line 69 "S++.y"
                   {current_type=(yyvsp[0].string); (yyval.string)=(yyvsp[0].string);}
-#line 1378 "S++.tab.c"
+#line 1391 "S++.tab.c"
     break;
 
   case 6: /* types: STRING_TYPE  */
-#line 57 "S++.y"
+#line 70 "S++.y"
                    {current_type=(yyvsp[0].string); (yyval.string)=(yyvsp[0].string);}
-#line 1384 "S++.tab.c"
+#line 1397 "S++.tab.c"
     break;
 
   case 7: /* types: BOOL_TYPE  */
-#line 58 "S++.y"
+#line 71 "S++.y"
                   {current_type=(yyvsp[0].string); (yyval.string)=(yyvsp[0].string);}
-#line 1390 "S++.tab.c"
+#line 1403 "S++.tab.c"
     break;
 
   case 12: /* $@1: %empty  */
-#line 68 "S++.y"
+#line 81 "S++.y"
                                {current_def_var=string((yyvsp[0].string)); current_def_func=string((yyvsp[0].string));}
-#line 1396 "S++.tab.c"
+#line 1409 "S++.tab.c"
     break;
 
   case 18: /* $@2: %empty  */
-#line 79 "S++.y"
+#line 92 "S++.y"
                     {current_def_var="global";}
-#line 1402 "S++.tab.c"
+#line 1415 "S++.tab.c"
     break;
 
   case 23: /* $@3: %empty  */
-#line 87 "S++.y"
+#line 100 "S++.y"
               {current_def_func="global";}
-#line 1408 "S++.tab.c"
+#line 1421 "S++.tab.c"
     break;
 
   case 28: /* $@4: %empty  */
-#line 95 "S++.y"
+#line 108 "S++.y"
                                                             {current_def_var=string((yyvsp[-6].string));}
-#line 1414 "S++.tab.c"
+#line 1427 "S++.tab.c"
     break;
 
   case 29: /* functions: DEF_FUNC STRING '(' list_param ')' '-' '>' types $@4 '{' list_statements '}'  */
-#line 95 "S++.y"
-                                                                                                                  {table.addFunc(string((yyvsp[-10].string)),string((yyvsp[-4].string)),parameters,current_def_func); parameters.clear();}
-#line 1420 "S++.tab.c"
+#line 108 "S++.y"
+                                                                                                                  {table.addFunc(string((yyvsp[-10].string)),string((yyvsp[-4].string)),parameters,current_def_func); parameters.clear(); definedFunctions.insert((yyvsp[-10].string));}
+#line 1433 "S++.tab.c"
     break;
 
   case 30: /* $@5: %empty  */
-#line 96 "S++.y"
+#line 109 "S++.y"
                                               {current_def_var=string((yyvsp[-3].string));}
-#line 1426 "S++.tab.c"
+#line 1439 "S++.tab.c"
     break;
 
   case 31: /* functions: DEF_FUNC STRING '(' list_param ')' $@5 '{' list_statements '}'  */
-#line 96 "S++.y"
-                                                                                                     {table.addFunc(string((yyvsp[-7].string)),"none",parameters,current_def_func); parameters.clear();}
-#line 1432 "S++.tab.c"
+#line 109 "S++.y"
+                                                                                                     {table.addFunc(string((yyvsp[-7].string)),"none",parameters,current_def_func); parameters.clear();  definedFunctions.insert((yyvsp[-7].string));}
+#line 1445 "S++.tab.c"
     break;
 
   case 36: /* param: types ID  */
-#line 107 "S++.y"
+#line 120 "S++.y"
                 {parameters.push_back(string((yyvsp[-1].string)));}
-#line 1438 "S++.tab.c"
+#line 1451 "S++.tab.c"
     break;
 
   case 37: /* $@6: %empty  */
-#line 110 "S++.y"
+#line 123 "S++.y"
       {current_def_var="main";}
-#line 1444 "S++.tab.c"
+#line 1457 "S++.tab.c"
     break;
 
   case 55: /* decl: types ID  */
-#line 134 "S++.y"
-               { table.addVar(current_type, (yyvsp[0].string), "", current_def_var);  }
-#line 1450 "S++.tab.c"
+#line 147 "S++.y"
+               { if(table.varName((yyvsp[0].string))!="NULL")
+                {
+                    yyerror("The variable is already defined!");
+                }
+                table.addVar(current_type, (yyvsp[0].string), "", current_def_var);  }
+#line 1467 "S++.tab.c"
+    break;
+
+  case 56: /* decl: types ID '[' NR ']'  */
+#line 152 "S++.y"
+                          {if(table.varName((yyvsp[-3].string))!="NULL")
+                        {
+                            yyerror("The variable is already defined!");
+                        }
+                        table.addVar(current_type, (yyvsp[-3].string), "undefined", current_def_var);}
+#line 1477 "S++.tab.c"
     break;
 
   case 57: /* decl: types ID ASSIGN expression  */
-#line 136 "S++.y"
-                                 { table.addVar(current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);}
-#line 1456 "S++.tab.c"
+#line 157 "S++.y"
+                                 { if(table.varName((yyvsp[-2].string))!="NULL")
+                                    {
+                                        yyerror("The variable is already defined!");
+                                    } 
+                                    table.addVar(current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);}
+#line 1487 "S++.tab.c"
     break;
 
   case 58: /* decl: CONST types ID ASSIGN expression  */
-#line 137 "S++.y"
-                                       {table.addVar(string((yyvsp[-4].string))+" "+current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);}
-#line 1462 "S++.tab.c"
-    break;
-
-  case 64: /* value: NR  */
-#line 151 "S++.y"
-            {(yyval.string)=(yyvsp[0].string);}
-#line 1468 "S++.tab.c"
-    break;
-
-  case 65: /* value: NR '.' NR  */
-#line 152 "S++.y"
-                 {current_value=string((yyvsp[-2].string))+"."+string((yyvsp[0].string)); (yyval.string)=current_value.c_str();}
-#line 1474 "S++.tab.c"
-    break;
-
-  case 66: /* value: '<' '<' STRING '>' '>'  */
-#line 153 "S++.y"
-                            {current_value=string((yyvsp[-2].string)); (yyval.string)=current_value.c_str();}
-#line 1480 "S++.tab.c"
-    break;
-
-  case 67: /* value: '<' CHAR '>'  */
-#line 154 "S++.y"
-                   {current_value=string((yyvsp[-1].string));(yyval.string)=current_value.c_str();}
-#line 1486 "S++.tab.c"
-    break;
-
-  case 68: /* value: ID '[' NR ']'  */
-#line 155 "S++.y"
-                    {current_value=string((yyvsp[-3].string))+"["+string((yyvsp[-1].string))+"]";  (yyval.string)=current_value.c_str();}
-#line 1492 "S++.tab.c"
-    break;
-
-  case 69: /* value: ID  */
-#line 156 "S++.y"
-         {current_value=(yyvsp[0].string); (yyval.string)=(yyvsp[0].string);}
+#line 162 "S++.y"
+                                       {
+                                    if(table.varName((yyvsp[-3].string))!="NULL")
+                                        {
+                                            yyerror("The variable is already defined!");
+                                        } 
+                                    table.addVar(string((yyvsp[-4].string))+" "+current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);}
 #line 1498 "S++.tab.c"
     break;
 
+  case 61: /* left_value: ID  */
+#line 176 "S++.y"
+               {current_id=(yyvsp[0].string);
+                 if (table.varName(current_id) == "NULL")
+                {
+                    yyerror("Variable not defined!");
+                }}
+#line 1508 "S++.tab.c"
+    break;
+
+  case 64: /* value: NR  */
+#line 185 "S++.y"
+            {(yyval.string)=(yyvsp[0].string);}
+#line 1514 "S++.tab.c"
+    break;
+
+  case 65: /* value: NR '.' NR  */
+#line 186 "S++.y"
+                 {current_value=string((yyvsp[-2].string))+"."+string((yyvsp[0].string)); (yyval.string)=current_value.c_str();}
+#line 1520 "S++.tab.c"
+    break;
+
+  case 66: /* value: '<' '<' STRING '>' '>'  */
+#line 187 "S++.y"
+                            {current_value=string((yyvsp[-2].string)); (yyval.string)=current_value.c_str();}
+#line 1526 "S++.tab.c"
+    break;
+
+  case 67: /* value: '<' CHAR '>'  */
+#line 188 "S++.y"
+                   {current_value=string((yyvsp[-1].string));(yyval.string)=current_value.c_str();}
+#line 1532 "S++.tab.c"
+    break;
+
+  case 68: /* value: ID '[' NR ']'  */
+#line 189 "S++.y"
+                    {current_value=string((yyvsp[-3].string))+"["+string((yyvsp[-1].string))+"]";  (yyval.string)=current_value.c_str();}
+#line 1538 "S++.tab.c"
+    break;
+
+  case 69: /* value: ID  */
+#line 190 "S++.y"
+         {current_value=(yyvsp[0].string); (yyval.string)=(yyvsp[0].string);}
+#line 1544 "S++.tab.c"
+    break;
+
+  case 70: /* value: func_call  */
+#line 191 "S++.y"
+                {(yyval.string)=(yyvsp[0].string);}
+#line 1550 "S++.tab.c"
+    break;
+
   case 71: /* value: ID '-' '>' ID  */
-#line 158 "S++.y"
+#line 192 "S++.y"
                    {current_value=string((yyvsp[-3].string))+"->"+string((yyvsp[0].string)); (yyval.string)=current_value.c_str();}
-#line 1504 "S++.tab.c"
+#line 1556 "S++.tab.c"
     break;
 
   case 72: /* expression: arithmetic_expression  */
-#line 161 "S++.y"
+#line 195 "S++.y"
                                   {(yyval.string)=(yyvsp[0].string);}
-#line 1510 "S++.tab.c"
+#line 1562 "S++.tab.c"
     break;
 
   case 73: /* expression: boolean_expression  */
-#line 162 "S++.y"
+#line 196 "S++.y"
                              {(yyval.string)=(yyvsp[0].string);}
-#line 1516 "S++.tab.c"
+#line 1568 "S++.tab.c"
     break;
 
   case 74: /* arithmetic_expression: arithmetic_expression PLUS arithmetic_expression  */
-#line 166 "S++.y"
+#line 200 "S++.y"
                                                                         { current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1522 "S++.tab.c"
+#line 1574 "S++.tab.c"
     break;
 
   case 75: /* arithmetic_expression: arithmetic_expression MINUS arithmetic_expression  */
-#line 167 "S++.y"
+#line 201 "S++.y"
                                                              {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1528 "S++.tab.c"
+#line 1580 "S++.tab.c"
     break;
 
   case 76: /* arithmetic_expression: arithmetic_expression MUL arithmetic_expression  */
-#line 168 "S++.y"
+#line 202 "S++.y"
                                                            {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1534 "S++.tab.c"
+#line 1586 "S++.tab.c"
     break;
 
   case 77: /* arithmetic_expression: arithmetic_expression DIV arithmetic_expression  */
-#line 169 "S++.y"
+#line 203 "S++.y"
                                                            {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1540 "S++.tab.c"
+#line 1592 "S++.tab.c"
     break;
 
   case 78: /* arithmetic_expression: arithmetic_expression MOD arithmetic_expression  */
-#line 170 "S++.y"
+#line 204 "S++.y"
                                                            {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1546 "S++.tab.c"
+#line 1598 "S++.tab.c"
     break;
 
   case 79: /* arithmetic_expression: value  */
-#line 171 "S++.y"
+#line 205 "S++.y"
                  {(yyval.string)=(yyvsp[0].string); }
-#line 1552 "S++.tab.c"
+#line 1604 "S++.tab.c"
     break;
 
   case 80: /* arithmetic_expression: '(' arithmetic_expression ')'  */
-#line 172 "S++.y"
+#line 206 "S++.y"
                                         {current="("+string((yyvsp[-1].string))+")"; (yyval.string)=current.c_str();}
-#line 1558 "S++.tab.c"
+#line 1610 "S++.tab.c"
     break;
 
   case 93: /* boolean_expression: BOOL_TRUE  */
-#line 187 "S++.y"
+#line 221 "S++.y"
                              {current_value=(yyvsp[0].string);}
-#line 1564 "S++.tab.c"
+#line 1616 "S++.tab.c"
     break;
 
   case 94: /* boolean_expression: BOOL_FALSE  */
-#line 188 "S++.y"
+#line 222 "S++.y"
                               {current_value=(yyvsp[0].string);}
-#line 1570 "S++.tab.c"
+#line 1622 "S++.tab.c"
+    break;
+
+  case 103: /* func_call: STRING '(' list_calls ')'  */
+#line 242 "S++.y"
+                                     {  (yyval.string)=(yyvsp[-3].string);
+                                        if (definedFunctions.find((yyvsp[-3].string)) == definedFunctions.end()) 
+                                        {
+                                            yyerror("Function not defined: " + string((yyvsp[-3].string)));
+                                        }  
+                                        else{ if (!funcparam.empty()) 
+                                            {
+                                                funcparam.erase(funcparam.size() - 1);
+                                            }
+                                        int poz=0;
+                                        while(poz!=-1)
+                                        {
+                                            poz=funcparam.find("_const_");
+                                            if(poz!=-1)
+                                                funcparam.replace(poz,8,"");
+                                        }
+                                        string numeFunc = (yyvsp[-3].string);
+                                        string paramDef = table.funcPar(numeFunc);
+                                        string paramCall = funcparam;
+
+                                        int nrParDef=countWords(paramDef);
+                                        int nrParCall=countWords(paramCall);
+                                        cout<<paramDef<<endl;
+                                        cout<<paramCall<<endl;
+                                        if(nrParDef!=nrParCall)
+                                            {
+                                                yyerror("Incorrect number of parameters in function call: " + numeFunc);
+                                            }
+                                        else if (paramDef != paramCall) 
+                                            { 
+                                                
+                                                yyerror("The variables have the wrong type in function call: " + numeFunc);
+                                            }
+
+                                        funcparam = "";}}
+#line 1662 "S++.tab.c"
+    break;
+
+  case 106: /* list_calls: expression  */
+#line 281 "S++.y"
+                        {
+                        if(isInteger((yyvsp[0].string))==true)
+                            {funcparam = "normal " + funcparam;}
+                        else if(isFloat((yyvsp[0].string))==true)
+                            {funcparam = "different " + funcparam;}
+                        else if(isChar((yyvsp[0].string))==true)
+                            {funcparam = "unique " + funcparam;}
+                        else if(isBool((yyvsp[0].string))==true)
+                            {funcparam = "decision " + funcparam;}
+                        else if(isString((yyvsp[0].string))==true && table.funcName((yyvsp[0].string))=="NULL")
+                            {funcparam = "special " + funcparam;}
+                        else if(table.varType((yyvsp[0].string))!="NULL")
+                            {funcparam = table.varType((yyvsp[0].string)) + " " + funcparam;} 
+                        else if(table.funcType((yyvsp[0].string))!="NULL")
+                            {funcparam = table.funcType((yyvsp[0].string)) + " " + funcparam;} 
+                        else
+                            {yyerror("Variable/function not defined: " + string((yyvsp[0].string)));}
+                        }
+#line 1685 "S++.tab.c"
+    break;
+
+  case 107: /* list_calls: expression ',' list_calls  */
+#line 299 "S++.y"
+                                      {
+                                     if(isInteger((yyvsp[-2].string))==true)
+                                        {funcparam = "normal " + funcparam;}
+                                    else if(isFloat((yyvsp[-2].string))==true)
+                                        {funcparam = "different " + funcparam;}
+                                    else if(isChar((yyvsp[-2].string))==true)
+                                        {funcparam = "unique " + funcparam;}
+                                    else if(isBool((yyvsp[-2].string))==true)
+                                        {funcparam = "decision " + funcparam;}
+                                    else if(isString((yyvsp[-2].string))==true && table.funcName((yyvsp[-2].string))=="NULL")
+                                        {funcparam = "special " + funcparam;}
+                                    else if(table.varType((yyvsp[-2].string))!="NULL")
+                                        {funcparam = table.varType((yyvsp[-2].string)) + " " + funcparam;} 
+                                    else if(table.funcType((yyvsp[-2].string))!="NULL")
+                                        {funcparam = table.funcType((yyvsp[-2].string)) + " " + funcparam;} 
+                                    else
+                                        {yyerror("Variable/function not defined: " + string((yyvsp[-2].string)));}
+                            }
+#line 1708 "S++.tab.c"
     break;
 
 
-#line 1574 "S++.tab.c"
+#line 1712 "S++.tab.c"
 
       default: break;
     }
@@ -1763,10 +1901,114 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 224 "S++.y"
+#line 326 "S++.y"
 
-void yyerror(const char * s){
-    printf("error: %s at line:%d\n",s,yylineno);
+void yyerror(const string& s){
+    cout<<"error: "<<s<<" at line: "<<yylineno<<endl;
+    exit(EXIT_FAILURE);
+}
+
+string Eval(const string& input)
+{
+    return "";
+}
+
+string TypeOf(const string& input)
+{
+    return "";
+}
+
+int countWords(const string& input) // NOU
+{
+    int wordCount = 0;
+    bool inWord = false;
+
+    for (char ch : input)
+    {
+        if (isspace(ch))
+        {
+            if (inWord)
+            {
+                inWord = false;
+                wordCount++;
+            }
+        }
+        else
+        {
+            inWord = true;
+        }
+    }
+
+    if (inWord)
+    {
+        wordCount++;
+    }
+
+    return wordCount;
+}
+
+bool isInteger(const string& s)//NOU
+{
+    try {
+        int nr=stoi(s);
+        if(s==to_string(nr))
+            return true;
+        else
+            return false;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool isFloat(const string& s)//NOU
+{
+    try {
+        stof(s);
+        return true;
+    } catch (...) {
+        return false;
+    }
+}
+
+bool isChar(const string& s)//NOU
+{
+    if(s.length() == 1 )
+        return true;
+    else 
+        return false; 
+}
+
+bool isBool(const string& s)//NOU
+{
+    if(s == "true" || s == "false")
+        return true;
+    else return false;
+}
+
+bool isString(const string& s)//NOU
+{
+    if(s[0]!='_' && s.length()>1)
+        return true;
+    else return false;
+}
+
+string inputType(const string& s) //NOU
+{
+
+    // Verificare tipului
+    if (isInteger(s)) {
+        return "normal";
+    } else if (isFloat(s)) {
+        return "different";
+    } else if (isChar(s)) {
+        return "unique";
+    } else if (isBool(s)) {
+        return "decision";
+    } else {
+        return "special";
+    }
+
+    return 0;
 }
 
 int main(int argc, char** argv){

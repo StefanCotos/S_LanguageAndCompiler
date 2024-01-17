@@ -31,6 +31,113 @@ void symbolTable::addFunc(string name, string returnType, vector<string> paramet
     funcInfoShow.push_back(f);
 }
 
+string symbolTable::varName(string msg) 
+{
+    for (varInfo v : varInfoShow)
+    {
+        if (v.name == msg)
+        {
+            return v.name;
+        }
+    }
+    return "NULL";
+}
+
+string symbolTable::varType(string msg) 
+{
+    for (varInfo v : varInfoShow)
+    {
+        if (v.name == msg)
+        {
+            return v.type;
+        }
+    }
+    return "NULL";
+}
+
+string symbolTable::varVal(string msg) 
+{
+    for (varInfo v : varInfoShow)
+    {
+        if (v.name == msg)
+        {
+            return v.value;
+        }
+    }
+    return "NULL";
+}
+
+string symbolTable::varDef(string msg) 
+{
+    for (varInfo v : varInfoShow)
+    {
+        if (v.name == msg)
+        {
+            return v.def;
+        }
+    }
+    return "NULL";
+}
+
+string symbolTable::funcName(string msg) 
+{
+    for (funcInfo f : funcInfoShow)
+    {
+        if (f.name == msg)
+        {
+            return f.name;
+        }
+    }
+    return "NULL";
+}
+
+string symbolTable::funcType(string msg) 
+{
+    for (funcInfo f : funcInfoShow)
+    {
+        if (f.name == msg)
+        {
+            return f.returnType;
+        }
+    }
+    return "NULL";
+}
+
+string symbolTable::funcPar(string msg) 
+{
+    string aux;
+    for (funcInfo f : funcInfoShow)
+    {
+        if (f.name == msg)
+        {
+            for (auto vect : f.parameters)
+            {
+                aux = aux + vect;
+                aux = aux + " ";
+            }
+
+            if (!aux.empty())
+            {
+                aux.erase(aux.size() - 1);
+            }
+            return aux;
+        }
+    }
+    return ""; // Returnăm un șir vid în loc de "NULL"
+}
+
+string symbolTable::funcDef(string msg) 
+{
+    for (funcInfo f : funcInfoShow)
+    {
+        if (f.name == msg)
+        {
+            return f.def;
+        }
+    }
+    return "NULL";
+}
+
 void symbolTable::printTable()
 {
     fout << "Information about variables:" << endl;
