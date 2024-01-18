@@ -157,27 +157,31 @@ declarations: decl ';'   //pentru declararea/definirea variabilelor
 
 decl: types ID { if(table.varName($2)!="NULL")
                 {
-                    yyerror("The variable is already defined!");
+                    yyerror("The variable is already defined! " + string($2));
                 }
                 table.addVar(current_type, $2, "", current_def_var);  }
     | types ID '[' NR ']' {if(table.varName($2)!="NULL")
                         {
-                            yyerror("The variable is already defined!");
+                            yyerror("The variable is already defined! " + string($2));
                         }
                         table.addVar(current_type, $2, "undefined", current_def_var);
                         }
     | types ID ASSIGN expression { if(table.varName($2)!="NULL")
                                     {
-                                        yyerror("The variable is already defined!");
+                                        yyerror("The variable is already defined! " + string($2));
                                     } 
 
-                                    table.addVar(current_type, $2, $4, current_def_var);}
+                                    string verif;
+                                    if(isString($4)!=true && isChar($4)!=true)
+                                        verif=TypeOf($4);
+
+                                    table.addVar(current_type, $2, $4, current_def_var);
                                  
-                                    /* if(isInteger($4)==true && string($1)!="normal")
+                                    if(verif=="normal" && string($1)!="normal")
                                     {
                                             yyerror("Left type: " + string($1) + " right type: " + string($4));
                                     }
-                                    else if(isFloat($4)==true && string($1)!="different")
+                                    else if(verif=="different" && string($1)!="different")
                                         {
                                             yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
@@ -185,7 +189,7 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         {
                                             yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
-                                    else if(isBool($4)==true && string($1)!="decision")
+                                    else if(verif=="decision" && string($1)!="decision")
                                         {
                                             yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
@@ -193,19 +197,23 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         {
                                             yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
-                                    } */
+                                    }
     | CONST types ID ASSIGN expression {
                                     if(table.varName($2)!="NULL")
                                         {
-                                            yyerror("The variable is already defined!");
+                                            yyerror("The variable is already defined! " + string($3));
                                         } 
                                     
-                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);}
-                                    /*if(isInteger($5)==true && string($2)!="normal")
+                                    string verif;
+                                    if(isString($5)!=true && isChar($5)!=true)
+                                        verif=TypeOf($5);
+
+                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);
+                                    if(verif=="normal" && string($2)!="normal")
                                     {
                                         yyerror("Left type :" + string($2) + " right type: " + string($5));
                                     }
-                                    else if(isFloat($5)==true && string($2)!="different")
+                                    else if(verif=="different" && string($2)!="different")
                                         {
                                             yyerror("Left type: " + string($2) + " right type: " + string($5));
                                         }
@@ -213,7 +221,7 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         {
                                             yyerror("Left type: " + string($2) + " right type: " + string($5));
                                         }
-                                    else if(isBool($5)==true && string($2)!="decision")
+                                    else if(verif=="decision" && string($2)!="decision")
                                         {
                                             yyerror("Left type: " + string($2) + " right type: " + string($5));
                                         }
@@ -221,15 +229,20 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         {
                                             yyerror("Left type: " + string($2) + " right type: " + string($5));
                                         }
-                                    }*/
+                                    }
     ;
 
-assign_statements: left_value ASSIGN expression  /*{
-                                                if(isInteger($3)==true && table.varType(string($1))!="normal")
+assign_statements: left_value ASSIGN expression  {
+
+                                                string verif;
+                                                if(isString($3)!=true && isChar($3)!=true)
+                                                    verif=TypeOf($3);
+
+                                                if(verif=="normal" && table.varType(string($1))!="normal")
                                                 {
                                                     yyerror("Left type :" + table.varType(string($1)) + " right type: " + string($3));
                                                 }
-                                                else if(isFloat($3)==true && table.varType(string($1))!="different")
+                                                else if(verif=="different" && table.varType(string($1))!="different")
                                                     {
                                                         yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
                                                     }
@@ -237,7 +250,7 @@ assign_statements: left_value ASSIGN expression  /*{
                                                     {
                                                         yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
                                                     }
-                                                else if(isBool($3)==true && table.varType(string($1))!="decision")
+                                                else if(verif=="decision" && table.varType(string($1))!="decision")
                                                     {
                                                         yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
                                                     }
@@ -245,7 +258,7 @@ assign_statements: left_value ASSIGN expression  /*{
                                                     {
                                                         yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
                                                     }
-                                                }*/
+                                                }
                                                 // statement ul de assignare 
                 ;
 

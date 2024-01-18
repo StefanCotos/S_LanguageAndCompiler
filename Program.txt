@@ -21,22 +21,20 @@ normal _z:10;
 normal _y:20;
 decision _k:false;
 
-func par(normal _num, unique _c, different _f, normal _b) -> normal
+func par(normal _num, unique _c) -> normal
 {
     normal _num:12;
     give _num;  
 }
 
 main_start
-
-    animals _a;
+    
     normal _b: 3 _+_ 4;
     _const_ unique _c:<a>;
     normal _nr:2;
-    unique _var; different _f:2.9;
+    unique _var; 
     _var:<i>;
     _const_ special _sir:<<Salut>>;
-    normal _num:5;
     normal _i:1;
     decision _OK:false;
     unique _C:<a>;
@@ -74,9 +72,8 @@ main_start
     }
 
     normal _j: 3 _+_ 4 _*_ (5 _/_ 10);
-    _nr: par(2, impar(4, _C), prim(_a->_x _+_ 4));
-    par(Eval(_i), _num);
-    _a->_f:10.0;
+    par(Eval(4), _num);
+    
     decision _test: ((3 neq 2) eq (10 great 2)) _&_ (3 neq (3 _+_ 1));
     
     give 1;
