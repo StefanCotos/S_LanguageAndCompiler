@@ -44,8 +44,8 @@ bool isString(const string& s);
 }
 
 %token  <string>INT_TYPE <string>FLOAT_TYPE <string>CHAR_TYPE <string>STRING_TYPE <string>BOOL_TYPE <string>BOOL_TRUE <string>BOOL_FALSE CLASS 
-        EQUAL NOT_EQUAL LOWER GREATER LOWER_EQUAL GREATER_EQUAL ASSIGN IMPORT <string>NR
-        EXPORT GIVE <string>CONST AND OR NOT IF_STATEMENT ELSE_STATEMENT ELSE_IF_STATEMENT WHILE_STATEMENT FOR_STATEMENT LOOP_STATEMENT STOP
+        <string>EQUAL <string>NOT_EQUAL <string>LOWER <string>GREATER <string>LOWER_EQUAL <string>GREATER_EQUAL ASSIGN IMPORT <string>NR
+        EXPORT GIVE <string>CONST <string>AND <string>OR <string>NOT IF_STATEMENT ELSE_STATEMENT ELSE_IF_STATEMENT WHILE_STATEMENT FOR_STATEMENT LOOP_STATEMENT STOP
         <string>PLUS <string>MINUS <string>MUL <string>DIV <string>MOD EVAL TYPEOF MAIN_START MAIN_STOP DEF_FUNC <string>STRING_LITERAL '(' ')'
 %token<string> ID STRING CHAR
 
@@ -206,20 +206,20 @@ arithmetic_expression: arithmetic_expression PLUS arithmetic_expression { curren
         | '(' arithmetic_expression ')' {current="("+string($2)+")"; $$=current.c_str();}
         ;
 
-boolean_expression: arithmetic_expression EQUAL arithmetic_expression
-                 | arithmetic_expression NOT_EQUAL arithmetic_expression
-                 | arithmetic_expression LOWER arithmetic_expression
-                 | arithmetic_expression GREATER arithmetic_expression
-                 | arithmetic_expression LOWER_EQUAL arithmetic_expression
-                 | arithmetic_expression GREATER_EQUAL arithmetic_expression
-                 | '(' boolean_expression ')' EQUAL boolean_expression
-                 | '(' boolean_expression ')' NOT_EQUAL boolean_expression
-                 | '(' boolean_expression ')' AND boolean_expression
-                 | '(' boolean_expression ')' OR boolean_expression
-                 | NOT boolean_expression
-                 | '(' boolean_expression ')'
-                 | BOOL_TRUE {current_value=$1;}
-                 | BOOL_FALSE {current_value=$1;}
+boolean_expression: arithmetic_expression EQUAL arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | arithmetic_expression NOT_EQUAL arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | arithmetic_expression LOWER arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | arithmetic_expression GREATER arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | arithmetic_expression LOWER_EQUAL arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | arithmetic_expression GREATER_EQUAL arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | '(' boolean_expression ')' EQUAL boolean_expression {current="(" + string($1) + ")" +" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | '(' boolean_expression ')' NOT_EQUAL boolean_expression {current="(" + string($1) + ")" +" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | '(' boolean_expression ')' AND boolean_expression {current="(" + string($1) + ")" +" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | '(' boolean_expression ')' OR boolean_expression {current="(" + string($1) + ")" +" "+string($2)+" "+string($3); $$=current.c_str();}
+                 | NOT boolean_expression {current=string($1)+" "+string($2); $$=current.c_str();}
+                 | '(' boolean_expression ')' {current="(" + string($1) + ")"; $$=current.c_str();}
+                 | BOOL_TRUE {$$=$1;}
+                 | BOOL_FALSE {$$=$1;}
                  ;
 
 if_statement: IF_STATEMENT '(' boolean_expression ')' '{' list_statements '}'        //forma pentru if
@@ -261,8 +261,7 @@ func_call: STRING '(' list_calls ')' {  $$=$1;
 
                                         int nrParDef=countWords(paramDef);
                                         int nrParCall=countWords(paramCall);
-                                        cout<<paramDef<<endl;
-                                        cout<<paramCall<<endl;
+                                        
                                         if(nrParDef!=nrParCall)
                                             {
                                                 yyerror("Incorrect number of parameters in function call: " + numeFunc);
@@ -331,6 +330,7 @@ void yyerror(const string& s){
 
 string Eval(const string& input)
 {
+
     return "";
 }
 

@@ -317,12 +317,6 @@ Operations parse_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_it
         else
             throw runtime_error("Eroare: Paranteza nu s-a inchis!");
     }
-    // else if (tokens_iter->value=="_!_")
-    // {
-    //     tokens_iter++;
-    //     auto expr = parse_expression_bool(tokens, tokens_iter);
-    //     return expr;
-    // }
     else
         throw std::runtime_error("Eroare: Token incorect!");
 }
@@ -339,14 +333,15 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
     }
     else
     {
-        Operations left_expr;
+        Operations left_expr, right_expr;
         if (tokens_iter->value == "_!_")
         {
-            expr.value = tokens_iter->value;
-            expr.type = tokens_iter->type;
+            new_expr.value = tokens_iter->value;
+            new_expr.type = tokens_iter->type;
             tokens_iter++;
             left_expr = parse_bool(tokens, tokens_iter);
-            expr.left_expr = make_unique<Operations>(move(left_expr));
+            new_expr.left_expr = make_unique<Operations>(move(left_expr));
+            left_expr = move(new_expr);
         }
         else
             left_expr = parse_bool(tokens, tokens_iter);
@@ -359,7 +354,15 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
                 auto token_type = tokens_iter->type;
                 auto precedence = get_precedence_bool(tokens_iter->value);
                 tokens_iter++;
-                auto right_expr = parse_bool(tokens, tokens_iter);
+                if (tokens_iter->value == "_!_")
+                {
+                    right_expr.value = tokens_iter->value;
+                    right_expr.type = tokens_iter->type;
+                    tokens_iter++;
+                    right_expr.left_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                }
+                else
+                    right_expr = parse_bool(tokens, tokens_iter);
                 tokens_iter++;
 
                 while (tokens_iter != tokens.end())
@@ -375,7 +378,16 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
                             new_expr.value = next_token_value;
                             new_expr.type = next_token_type;
                             new_expr.left_expr = make_unique<Operations>(move(right_expr));
-                            new_expr.right_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                            if (tokens_iter->value == "_!_")
+                            {
+                                new_expr.right_expr= make_unique<Operations>();
+                                new_expr.right_expr->value = tokens_iter->value;
+                                new_expr.right_expr->type = tokens_iter->type;
+                                tokens_iter++;
+                                new_expr.right_expr->left_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                            }
+                            else
+                                new_expr.right_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
                             right_expr = move(new_expr);
                         }
                         else if (next_precedence <= precedence)
@@ -385,7 +397,15 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
                             new_expr.type = token_type;
                             new_expr.left_expr = make_unique<Operations>(move(left_expr));
                             new_expr.right_expr = make_unique<Operations>(move(right_expr));
-                            right_expr = parse_bool(tokens, tokens_iter);
+                            if (tokens_iter->value == "_!_")
+                            {
+                                right_expr.value = tokens_iter->value;
+                                right_expr.type = tokens_iter->type;
+                                tokens_iter++;
+                                right_expr.left_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                            }
+                            else
+                                right_expr = parse_bool(tokens, tokens_iter);
                             left_expr = move(new_expr);
                             token_value = next_token_value;
                             token_type = next_token_type;
@@ -580,7 +600,8 @@ int main()
     cout << "Rezultatul:" << result_int(expr);
     cout << endl;*/
 
-    string input = "_!_ (3 neq 2)";
+    //string input = "_!_((4 eq (10 _-_ 6)) _&_ _!_true _|_ _!_false) eq (12 neq 12) neq _!_true _&_ _!_(3 great 4)";
+    string input="4 eq 4";
     auto t = lexing_bool(input);
     for (auto token : t)
     {

@@ -225,12 +225,106 @@ vector<Tokens> AST::lexing(const string &input)
     return tokens;
 }
 
+vector<Tokens> AST::lexing_bool(const string &input)
+{
+    vector<Tokens> tokens;
+    auto elements = input.begin();
+    string str;
+
+    while (elements != input.end())
+    {
+        char c = *elements;
+        switch (c)
+        {
+        case '0' ... '9':
+        {
+            while (elements != input.end() && (isdigit(*elements) || *elements == '.'))
+            {
+                str.push_back(*elements);
+                elements++;
+            }
+            tokens.push_back(Tokens(TokenType::Operand, str));
+            str.clear();
+            break;
+        }
+        case '_':
+        {
+            str.push_back(*elements);
+            elements++;
+            if (*elements == '+' || *elements == '-' || *elements == '*' || *elements == '/' || *elements == '%' || *elements == '&' || *elements == '|' || *elements == '!')
+            {
+                str.push_back(*elements);
+                elements++;
+                if (*elements == '_')
+                    str.push_back(*elements);
+                else
+                    throw runtime_error("Eroare: Expresie incorecta!");
+            }
+            else
+                throw runtime_error("Eroare: Expresie incorecta!");
+            tokens.push_back(Tokens(TokenType::Operator, str));
+            elements++;
+            str.clear();
+            break;
+        }
+        case 'a' ... 'z':
+        {
+            while (elements != input.end() && (*elements >= 'a' && *elements <= 'z'))
+            {
+                str.push_back(*elements);
+                elements++;
+            }
+            if (str == "eq" || str == "neq" || str == "leq" || str == "geq" || str == "low" || str == "great")
+                tokens.push_back(Tokens(TokenType::Operator, str));
+            else if (str == "true" || str == "false")
+                tokens.push_back(Tokens(TokenType::Operand, str));
+            else
+                throw runtime_error("Eroare: Expresie incorecta!");
+            str.clear();
+            break;
+        }
+        case '(':
+            str.push_back(*elements);
+            tokens.push_back(Tokens(TokenType::LParenthesis, str));
+            elements++;
+            str.clear();
+            break;
+        case ')':
+            str.push_back(*elements);
+            tokens.push_back(Tokens(TokenType::RParenthesis, str));
+            elements++;
+            str.clear();
+            break;
+        case ' ':
+            ++elements;
+            break;
+        default:
+            throw runtime_error("Eroare: Expresie incorecta!");
+        }
+    }
+    return tokens;
+}
+
 int AST::get_precedence(string op)
 {
     if (op == "_+_" || op == "_-_")
         return 1;
     else if (op == "_*_" || op == "_/_" || op == "_%_")
         return 2;
+    else
+        return 0;
+}
+
+int AST::get_precedence_bool(string op)
+{
+    if (op == "_+_" || op == "_-_")
+        return 1;
+    else if (op == "_*_" || op == "_/_" || op == "_%_")
+        return 2;
+    else if (op == "eq" || op == "neq" || op == "leq" || op == "geq" || op == "low" || op == "great")
+        return 3;
+    else if (op == "_&_" || op == "_|_")
+        return 4;
     else
         return 0;
 }
@@ -332,6 +426,140 @@ Operations AST::parsing(vector<Tokens> tokens)
     return parse_expression(tokens, tokens_iter);
 }
 
+Operations AST::parse_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_iter)
+{
+    if (tokens_iter->type == TokenType::Operand)
+    {
+        return Operations(tokens_iter->type, tokens_iter->value);
+    }
+    else if (tokens_iter->type == TokenType::LParenthesis)
+    {
+        tokens_iter++;
+        auto expr = parse_expression_bool(tokens, tokens_iter);
+        if (tokens_iter->type == TokenType::RParenthesis)
+            return expr;
+        else
+            throw runtime_error("Eroare: Paranteza nu s-a inchis!");
+    }
+    else
+        throw std::runtime_error("Eroare: Token incorect!");
+}
+
+Operations AST::parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_iter)
+{
+    Operations expr;
+    Operations new_expr;
+
+    if (tokens.size() == 1)
+    {
+        auto left_expr = parse_bool(tokens, tokens_iter);
+        expr = move(left_expr);
+    }
+    else
+    {
+        Operations left_expr, right_expr;
+        if (tokens_iter->value == "_!_")
+        {
+            new_expr.value = tokens_iter->value;
+            new_expr.type = tokens_iter->type;
+            tokens_iter++;
+            left_expr = parse_bool(tokens, tokens_iter);
+            new_expr.left_expr = make_unique<Operations>(move(left_expr));
+            left_expr = move(new_expr);
+        }
+        else
+            left_expr = parse_bool(tokens, tokens_iter);
+        tokens_iter++;
+        while (tokens_iter != tokens.end())
+        {
+            if (tokens_iter->type == TokenType::Operator)
+            {
+                auto token_value = tokens_iter->value;
+                auto token_type = tokens_iter->type;
+                auto precedence = get_precedence_bool(tokens_iter->value);
+                tokens_iter++;
+                if (tokens_iter->value == "_!_")
+                {
+                    right_expr.value = tokens_iter->value;
+                    right_expr.type = tokens_iter->type;
+                    tokens_iter++;
+                    right_expr.left_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                }
+                else
+                    right_expr = parse_bool(tokens, tokens_iter);
+                tokens_iter++;
+
+                while (tokens_iter != tokens.end())
+                {
+                    if (tokens_iter->type == TokenType::Operator)
+                    {
+                        auto next_token_value = tokens_iter->value;
+                        auto next_token_type = tokens_iter->type;
+                        auto next_precedence = get_precedence_bool(tokens_iter->value);
+                        if (next_precedence > precedence)
+                        {
+                            tokens_iter++;
+                            new_expr.value = next_token_value;
+                            new_expr.type = next_token_type;
+                            new_expr.left_expr = make_unique<Operations>(move(right_expr));
+                            if (tokens_iter->value == "_!_")
+                            {
+                                new_expr.right_expr= make_unique<Operations>();
+                                new_expr.right_expr->value = tokens_iter->value;
+                                new_expr.right_expr->type = tokens_iter->type;
+                                tokens_iter++;
+                                new_expr.right_expr->left_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                            }
+                            else
+                                new_expr.right_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                            right_expr = move(new_expr);
+                        }
+                        else if (next_precedence <= precedence)
+                        {
+                            tokens_iter++;
+                            new_expr.value = token_value;
+                            new_expr.type = token_type;
+                            new_expr.left_expr = make_unique<Operations>(move(left_expr));
+                            new_expr.right_expr = make_unique<Operations>(move(right_expr));
+                            if (tokens_iter->value == "_!_")
+                            {
+                                right_expr.value = tokens_iter->value;
+                                right_expr.type = tokens_iter->type;
+                                tokens_iter++;
+                                right_expr.left_expr = make_unique<Operations>(move(parse_bool(tokens, tokens_iter)));
+                            }
+                            else
+                                right_expr = parse_bool(tokens, tokens_iter);
+                            left_expr = move(new_expr);
+                            token_value = next_token_value;
+                            token_type = next_token_type;
+                            precedence = next_precedence;
+                        }
+                        else
+                            break;
+                        tokens_iter++;
+                    }
+                    else
+                        break;
+                }
+                expr.value = token_value;
+                expr.type = token_type;
+                expr.left_expr = make_unique<Operations>(move(left_expr));
+                expr.right_expr = make_unique<Operations>(move(right_expr));
+            }
+            else
+                break;
+        }
+    }
+    return expr;
+}
+
+Operations AST::parsing_bool(vector<Tokens> tokens)
+{
+    auto tokens_iter = tokens.begin();
+    return parse_expression_bool(tokens, tokens_iter);
+}
+
 int AST::result_int(const Operations &node)
 {
     if (node.type == 0)
@@ -384,6 +612,87 @@ float AST::result_float(const Operations &node)
     }
 }
 
+int AST::result_bool(const Operations &node)
+{
+    if (node.type == 0 && node.value == "true")
+        return true;
+    else if (node.type == 0 && node.value == "false")
+        return false;
+    else if (node.type == 0)
+        return stoi(node.value);
+    else if (node.value == "_+_")
+        return result_int(*node.left_expr) + result_int(*node.right_expr);
+    else if (node.value == "_-_")
+        return result_int(*node.left_expr) - result_int(*node.right_expr);
+    else if (node.value == "_*_")
+        return result_int(*node.left_expr) * result_int(*node.right_expr);
+    else if (node.value == "_/_")
+    {
+        double right_value = result_int(*node.right_expr);
+        if (right_value == 0)
+        {
+            throw std::runtime_error("Eroare: Impărțire la zero!");
+        }
+        return result_int(*node.left_expr) / right_value;
+    }
+    else if (node.value == "_%_")
+        return result_int(*node.left_expr) % result_int(*node.right_expr);
+    else if (node.value == "eq")
+    {
+        if (result_bool(*node.left_expr) == result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "neq")
+    {
+        if (result_bool(*node.left_expr) != result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "low")
+    {
+        if (result_bool(*node.left_expr) < result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "great")
+    {
+        if (result_bool(*node.left_expr) > result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "leq")
+    {
+        if (result_bool(*node.left_expr) <= result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "geq")
+    {
+        if (result_bool(*node.left_expr) >= result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "_&_")
+    {
+        if (result_bool(*node.left_expr) && result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "_|_")
+    {
+        if (result_bool(*node.left_expr) || result_bool(*node.right_expr))
+            return true;
+        return false;
+    }
+    else if (node.value == "_!_")
+        return !(result_bool(*node.left_expr));
+    else
+    {
+        throw runtime_error("Eroare: Operator necunoscut!");
+    }
+}
+
 string AST::ret_value_int(string input)
 {
     auto t = lexing(input);
@@ -404,6 +713,18 @@ string AST::ret_value_float(string input)
     //cout << "Rezultatul: " << res<<endl;
     string value = to_string(res);
     return value;
+}
+
+string AST::ret_value_bool(string input)
+{
+    auto t = lexing_bool(input);
+    auto expr = parsing_bool(t);
+    //preorder(expr); cout<<endl;
+    auto res = result_bool(expr);
+    //cout << "Rezultatul: " << res<<endl;
+    if(res==1)
+        return "true";
+    return "false";
 }
 
 void AST::preorder(const Operations &node)

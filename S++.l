@@ -13,20 +13,20 @@
 "true" {yylval.string = strdup(yytext); return BOOL_TRUE;}
 "false" {yylval.string = strdup(yytext); return BOOL_FALSE;}
 "group" {return CLASS;}
-"eq" {return EQUAL;}
-"neq" {return NOT_EQUAL;}
-"low" {return LOWER;}
-"great" {return GREATER;}
-"leq" {return LOWER_EQUAL;}
-"geq" {return GREATER_EQUAL;}
+"eq" {yylval.string = strdup(yytext); return EQUAL;}
+"neq" {yylval.string = strdup(yytext); return NOT_EQUAL;}
+"low" {yylval.string = strdup(yytext); return LOWER;}
+"great" {yylval.string = strdup(yytext); return GREATER;}
+"leq" {yylval.string = strdup(yytext); return LOWER_EQUAL;}
+"geq" {yylval.string = strdup(yytext); return GREATER_EQUAL;}
 ":" {return ASSIGN;}
 "import" {return IMPORT;} // cin
 "export" {return EXPORT;} // cout
 "give" {return GIVE;} // return
 "_const_" {yylval.string = strdup(yytext); return CONST;}
-"_&_" {return AND;}
-"_|_" {return OR;}
-"_!_" {return NOT;}
+"_&_" {yylval.string = strdup(yytext); return AND;}
+"_|_" {yylval.string = strdup(yytext); return OR;}
+"_!_" {yylval.string = strdup(yytext); return NOT;}
 "_if_" {return IF_STATEMENT;}
 "_else_" {return ELSE_STATEMENT;}
 "_else_if_" {return ELSE_IF_STATEMENT;}

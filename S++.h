@@ -56,15 +56,22 @@ class AST
 {
 public:
     vector<Tokens> lexing(const string &input);
+    vector<Tokens> lexing_bool(const string &input);
     int get_precedence(string op);
-    Operations parsing(vector<Tokens> tokens);
+    int get_precedence_bool(string op);
     Operations parse(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_iter);
     Operations parse_expression(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_iter);
+    Operations parsing(vector<Tokens> tokens);
+    Operations parse_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_iter);
+    Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator &tokens_iter);
+    Operations parsing_bool(vector<Tokens> tokens);
     int result_int(const Operations &node);
     float result_float(const Operations &node);
+    int result_bool(const Operations &node);
     void preorder(const Operations &node);
     string ret_value_int(string input);
     string ret_value_float(string input);
+    string ret_value_bool(string input);
 
 };
 
@@ -87,6 +94,5 @@ public:
     string funcPar(string msg);  
     string funcDef(string msg);  
 };
-
 
 void yyerror(const string &s);

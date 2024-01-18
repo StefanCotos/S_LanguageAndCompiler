@@ -6,7 +6,7 @@ Type: special Name: _str Value: HelloWorld Defined: nr
 Type: normal Name: _rezist Value: 10 Defined: str
 Type: normal Name: _w Value: 6 Defined: main
 Type: _const_ different Name: _y Value: 8.400000 Defined: main
-Type: decision Name: _ok Value: true Defined: main
+Type: decision Name: _ok Value: 4 eq 4 Defined: main
 Type: _const_ unique Name: _c Value: a Defined: main
 Type: different Name: _fF Value: 15.799999 Defined: main
 Type: special Name: _poz Value: CEVA Defined: main

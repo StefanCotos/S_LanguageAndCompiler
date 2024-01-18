@@ -23,7 +23,7 @@ main_start
 
     normal _w: 3 _-_ 2 _+_ (10 _%_ 3) _+_ 4 ;
     _const_ different _y: 8.4;
-    decision _ok:true;
+    decision _ok:4 eq 4;
     _const_ unique _c:<a>;
     different _fF: 15 _-_ 2.3 _+_ 3.1;
     special _poz:<<CEVA>>;
