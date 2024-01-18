@@ -21,6 +21,7 @@ void yyerror(const string& s);
 int countWords(const string& input);
 string inputType(const string& s);
 class symbolTable table;
+class AST ast;
 
 string current_id;
 string current_value;
@@ -78,7 +79,7 @@ user_data_types_section: user_data_types_def  // daca exista sau nu aceasta sect
 user_data_types_def: user_data_types  // daca exista definesc diferite tipuri
                 | user_data_types user_data_types_def
 
-user_data_types:  CLASS STRING {current_def_var=string($2); current_def_func=string($2);} '{' list_class '}'
+user_data_types:  CLASS STRING {current_def_var=string($2); current_def_func=string($2);} '{' list_class '}' {table.addClass($2,"global");}
     ;
 
 list_class: class 
@@ -135,9 +136,17 @@ statements: declarations
     | func_call ';'
     | give
     | STOP ';'
-    | STRING ID ';' //definirea claselor
     | IMPORT ID ';'
     | IMPORT ID '[' NR ']' ';'
+    | STRING '-''>' func_call ';'{if(table.className($1)=="NULL")
+                                    {
+                                        yyerror("Class not defined!");
+                                    }
+                                    else if(table.funcDef($4)!=string($1))
+                                        {
+                                            yyerror("Function not defined in class!");
+                                        }
+                            }
     | EXPORT export
     ;
 
@@ -153,43 +162,131 @@ decl: types ID { if(table.varName($2)!="NULL")
                         {
                             yyerror("The variable is already defined!");
                         }
-                        table.addVar(current_type, $2, "undefined", current_def_var);}
+                        table.addVar(current_type, $2, "undefined", current_def_var);
+                        }
     | types ID ASSIGN expression { if(table.varName($2)!="NULL")
                                     {
                                         yyerror("The variable is already defined!");
                                     } 
-                                    table.addVar(current_type, $2, $4, current_def_var);}
+
+                                    table.addVar(current_type, $2, $4, current_def_var);
+                                 
+                                    if(isInteger($4)==true && string($1)!="normal")
+                                    {
+                                            yyerror("INT Left type: " + string($1) + " right type: " + string($4));
+                                    }
+                                    else if(isFloat($4)==true && string($1)!="different")
+                                        {
+                                            yyerror("FLOAT Left type: " + string($1) + " right type: " + string($4));
+                                        }
+                                    else if(isChar($4)==true && string($1)!="unique")
+                                        {
+                                            yyerror("CHAR Left type: " + string($1) + " right type: " + string($4));
+                                        }
+                                    else if(isBool($4)==true && string($1)!="decision")
+                                        {
+                                            yyerror("BOOL Left type: " + string($1) + " right type: " + string($4));
+                                        }
+                                    else if(isString($4)==true && string($1)!="special")
+                                        {
+                                            yyerror("STRING Left type: " + string($1) + " right type: " + string($4));
+                                        }
+                                    }
     | CONST types ID ASSIGN expression {
                                     if(table.varName($2)!="NULL")
                                         {
                                             yyerror("The variable is already defined!");
                                         } 
-                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);}
+                                    
+                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);
+                                    if(isInteger($5)==true && string($2)!="normal")
+                                    {
+                                        yyerror("Left type :" + string($2) + " right type: " + string($5));
+                                    }
+                                    else if(isFloat($5)==true && string($2)!="different")
+                                        {
+                                            yyerror("Left type: " + string($2) + " right type: " + string($5));
+                                        }
+                                    else if(isChar($5)==true && string($2)!="unique")
+                                        {
+                                            yyerror("Left type: " + string($2) + " right type: " + string($5));
+                                        }
+                                    else if(isBool($5)==true && string($2)!="decision")
+                                        {
+                                            yyerror("Left type: " + string($2) + " right type: " + string($5));
+                                        }
+                                    else if(isString($5)==true && string($2)!="special")
+                                        {
+                                            yyerror("Left type: " + string($2) + " right type: " + string($5));
+                                        }
+                                    }
     ;
 
-assign_statements: left_value ASSIGN expression // statement ul de assignare
+assign_statements: left_value ASSIGN expression  {
+                                                if(isInteger($3)==true && table.varType(string($1))!="normal")
+                                                {
+                                                    yyerror("Left type :" + table.varType(string($1)) + " right type: " + string($3));
+                                                }
+                                                else if(isFloat($3)==true && table.varType(string($1))!="different")
+                                                    {
+                                                        yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
+                                                    }
+                                                else if(isChar($3)==true && table.varType(string($1))!="unique")
+                                                    {
+                                                        yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
+                                                    }
+                                                else if(isBool($3)==true && table.varType(string($1))!="decision")
+                                                    {
+                                                        yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
+                                                    }
+                                                else if(isString($3)==true && table.varType(string($1))!="special")
+                                                    {
+                                                        yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
+                                                    }
+                                                }
+                                                // statement ul de assignare 
                 ;
 
 assignments: assign_statements ';'
     ;
 
-left_value: ID {current_id=$1;
+left_value: ID {$$=$1;
+                current_id=$1;
                  if (table.varName(current_id) == "NULL")
                 {
                     yyerror("Variable not defined!");
                 }}
-    | ID '[' NR ']' 
-    | ID '-''>' ID
+    | ID '[' NR ']'  {$$=$1;
+                    current_id=$1;
+                 if (table.varName(current_id) == "NULL")
+                {
+                    yyerror("Vector not defined!");
+                }} 
+    | STRING '-''>' ID {$$=$4;
+                    if(table.varName($4)=="NULL")
+                    {
+                        yyerror("Variable not defined!");
+                    }
+                    else if(table.className($1)=="NULL")
+                    {
+                        yyerror("Class not defined!");
+                    }
+                    else if(table.varDef($4)!=string($1))
+                    {
+                        yyerror("Variable not defined in class!");
+                    }
+
+                } 
     ;
 
-value: NR   {$$=$1;}     //diferite valori ce pot fii atribuite variabilelor/functiilor etc.
+value: NR {$$=$1;}     //diferite valori ce pot fii atribuite variabilelor/functiilor etc.
     | NR '.' NR  {current_value=string($1)+"."+string($3); $$=current_value.c_str();}
     | '<''<' STRING '>''>'  {current_value=string($3); $$=current_value.c_str();}
     | '<' CHAR '>' {current_value=string($2);$$=current_value.c_str();}
     | ID '[' NR ']' {current_value=string($1)+"["+string($3)+"]";  $$=current_value.c_str();}
-    | ID {current_value=$1; $$=$1;} 
-    | func_call {$$=$1;}
-    | ID '-''>' ID {current_value=string($1)+"->"+string($4); $$=current_value.c_str();}
+    | ID {current_value=(table.varVal($1)).c_str(); $$=(table.varVal($1)).c_str();} 
+    | func_call /* {$$="1";} */
+    | STRING '-''>' ID {current_value=string($1)+"->"+string($4); $$=current_value.c_str();}
     ;
 
 expression: arithmetic_expression {$$=$1;}  //tipurile de expresii
@@ -206,7 +303,7 @@ arithmetic_expression: arithmetic_expression PLUS arithmetic_expression { curren
         | '(' arithmetic_expression ')' {current="("+string($2)+")"; $$=current.c_str();}
         ;
 
-boolean_expression: arithmetic_expression EQUAL arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
+boolean_expression: arithmetic_expression EQUAL arithmetic_expression {current=(string($1)+" "+string($2)+" "+string($3)).c_str(); $$=current.c_str();}
                  | arithmetic_expression NOT_EQUAL arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
                  | arithmetic_expression LOWER arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
                  | arithmetic_expression GREATER arithmetic_expression {current=string($1)+" "+string($2)+" "+string($3); $$=current.c_str();}
@@ -239,7 +336,7 @@ for_statement: FOR_STATEMENT '(' assign_statements ';' boolean_expression ';' as
 
 loop_statement: LOOP_STATEMENT '{' list_statements '}'   // forma pentru loop
 
-func_call: STRING '(' list_calls ')' {  $$=$1;
+func_call: STRING '(' list_calls ')' {  /* $$=$1; */
                                         if (definedFunctions.find($1) == definedFunctions.end()) 
                                         {
                                             yyerror("Function not defined: " + string($1));
@@ -368,6 +465,7 @@ int countWords(const string& input)
     return wordCount;
 }
 
+
 bool isInteger(const string& s)
 {
     try {
@@ -383,33 +481,54 @@ bool isInteger(const string& s)
 
 bool isFloat(const string& s)
 {
-    try {
-        stof(s);
-        return true;
-    } catch (...) {
+    if (isInteger(s)==true)
+    {
         return false;
+    }
+    else{
+        try {
+            stof(s);
+            return true;
+        } catch (...) {
+            return false;
+        }
     }
 }
 
 bool isChar(const string& s)
 {
-    if(s.length() == 1 )
-        return true;
+    if(isInteger(s)==true)
+    {
+        return false;
+    }
+    else if(s.length() == 1 )
+            return true;
     else 
         return false; 
 }
 
 bool isBool(const string& s)
 {
-    if(s == "true" || s == "false")
+    if (s == "true")
+        return true;
+    else if (s == "false")
         return true;
     else return false;
 }
 
 bool isString(const string& s)
 {
-    if(s[0]!='_' && s.length()>1)
-        return true;
+    int i=0;
+    while(s[i]!='\0')
+    {
+        if((s[i]<'A' || s[i]>'Z') && (s[i]<'a' || s[i]>'z'))
+            return false;
+        i++;
+    }
+    if (isFloat(s)==true || isInteger(s)==true || isBool(s)==true)
+        return false;
+    else if(s[0]!='_' && s.length()>1)
+            return true;
     else return false;
 }
 

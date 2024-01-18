@@ -25,6 +25,12 @@ struct funcInfo
     string def;
 };
 
+struct classInfo
+{
+    string name;
+    string def;
+};
+
 enum TokenType
 {
     Operand,
@@ -79,11 +85,13 @@ class symbolTable
 {
     vector<varInfo> varInfoShow;
     vector<funcInfo> funcInfoShow;
+    vector<classInfo> classInfoShow;
     AST ast;
 
 public:
     void addVar(string type, string name, string value, string def);
     void addFunc(string name, string returnType, vector<string> parameters, string def);
+    void addClass(string name, string def);
     void printTable();
     string varName(string msg);  
     string varType(string msg);  
@@ -92,7 +100,8 @@ public:
     string funcName(string msg); 
     string funcType(string msg); 
     string funcPar(string msg);  
-    string funcDef(string msg);  
+    string funcDef(string msg);
+    string className(string msg); 
 };
 
 void yyerror(const string &s);

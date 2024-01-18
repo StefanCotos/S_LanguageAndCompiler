@@ -1,17 +1,23 @@
 Information about variables:
+Type: normal Name: _xz Value: 3 Defined: cars
+Type: normal Name: _xy Value: 5 Defined: none
 Type: normal Name: _x Value: 13 Defined: global
 Type: _const_ normal Name: _t Value: 10 Defined: global
 Type: different Name: _F Value: 10.400000 Defined: global
 Type: special Name: _str Value: HelloWorld Defined: nr
 Type: normal Name: _rezist Value: 10 Defined: str
-Type: normal Name: _w Value: 6 Defined: main
+Type: normal Name: _w Value: 5 Defined: main
 Type: _const_ different Name: _y Value: 8.400000 Defined: main
-Type: decision Name: _ok Value: 4 eq 4 Defined: main
-Type: _const_ unique Name: _c Value: a Defined: main
+Type: decision Name: _ok Value: _!_ true Defined: main
+Type: unique Name: _c Value: a Defined: main
 Type: different Name: _fF Value: 15.799999 Defined: main
 Type: special Name: _poz Value: CEVA Defined: main
 
 Information about functions:
+Name: none Return type: none Parameters type:  Defined: cars
 Name: nr Return type: normal Parameters type: decision unique  Defined: global
 Name: str Return type: decision Parameters type: special  Defined: global
 Name: nothing Return type: none Parameters type:  Defined: global
+
+Information about class:
+Name: cars Defined: global

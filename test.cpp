@@ -341,7 +341,10 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
             tokens_iter++;
             left_expr = parse_bool(tokens, tokens_iter);
             new_expr.left_expr = make_unique<Operations>(move(left_expr));
-            left_expr = move(new_expr);
+            if(tokens.size()==2)
+                expr=move(new_expr);
+            else
+                left_expr = move(new_expr);
         }
         else
             left_expr = parse_bool(tokens, tokens_iter);
@@ -600,8 +603,8 @@ int main()
     cout << "Rezultatul:" << result_int(expr);
     cout << endl;*/
 
-    //string input = "_!_((4 eq (10 _-_ 6)) _&_ _!_true _|_ _!_false) eq (12 neq 12) neq _!_true _&_ _!_(3 great 4)";
-    string input="4 eq 4";
+    string input = "_!_((4 eq (10 _-_ 6)) _&_ _!_true _|_ _!_false) eq (12 neq 12) neq _!_true _&_ _!_(3 great 4)";
+    //string input="_!_false";
     auto t = lexing_bool(input);
     for (auto token : t)
     {

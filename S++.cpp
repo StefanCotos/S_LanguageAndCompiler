@@ -31,7 +31,15 @@ void symbolTable::addFunc(string name, string returnType, vector<string> paramet
     funcInfoShow.push_back(f);
 }
 
-string symbolTable::varName(string msg) 
+void symbolTable::addClass(string name, string def)
+{
+    classInfo c;
+    c.name = name;
+    c.def = def;
+    classInfoShow.push_back(c);
+}
+
+string symbolTable::varName(string msg)
 {
     for (varInfo v : varInfoShow)
     {
@@ -43,7 +51,7 @@ string symbolTable::varName(string msg)
     return "NULL";
 }
 
-string symbolTable::varType(string msg) 
+string symbolTable::varType(string msg)
 {
     for (varInfo v : varInfoShow)
     {
@@ -55,7 +63,7 @@ string symbolTable::varType(string msg)
     return "NULL";
 }
 
-string symbolTable::varVal(string msg) 
+string symbolTable::varVal(string msg)
 {
     for (varInfo v : varInfoShow)
     {
@@ -67,7 +75,7 @@ string symbolTable::varVal(string msg)
     return "NULL";
 }
 
-string symbolTable::varDef(string msg) 
+string symbolTable::varDef(string msg)
 {
     for (varInfo v : varInfoShow)
     {
@@ -79,7 +87,7 @@ string symbolTable::varDef(string msg)
     return "NULL";
 }
 
-string symbolTable::funcName(string msg) 
+string symbolTable::funcName(string msg)
 {
     for (funcInfo f : funcInfoShow)
     {
@@ -91,7 +99,7 @@ string symbolTable::funcName(string msg)
     return "NULL";
 }
 
-string symbolTable::funcType(string msg) 
+string symbolTable::funcType(string msg)
 {
     for (funcInfo f : funcInfoShow)
     {
@@ -103,7 +111,7 @@ string symbolTable::funcType(string msg)
     return "NULL";
 }
 
-string symbolTable::funcPar(string msg) 
+string symbolTable::funcPar(string msg)
 {
     string aux;
     for (funcInfo f : funcInfoShow)
@@ -126,7 +134,7 @@ string symbolTable::funcPar(string msg)
     return ""; // Returnăm un șir vid în loc de "NULL"
 }
 
-string symbolTable::funcDef(string msg) 
+string symbolTable::funcDef(string msg)
 {
     for (funcInfo f : funcInfoShow)
     {
@@ -138,14 +146,26 @@ string symbolTable::funcDef(string msg)
     return "NULL";
 }
 
+string symbolTable::className(string msg)
+{
+    for (classInfo c : classInfoShow)
+    {
+        if (c.name == msg)
+        {
+            return c.name;
+        }
+    }
+    return "NULL";
+}
+
 void symbolTable::printTable()
 {
     fout << "Information about variables:" << endl;
     for (varInfo v : varInfoShow)
     {
-        if(v.type=="normal" || v.type=="_const_ normal")
+        if (v.type == "normal" || v.type == "_const_ normal")
             fout << "Type: " << v.type << " Name: " << v.name << " Value: " << ast.ret_value_int(v.value) << " Defined: " << v.def << endl;
-        else if(v.type=="different" || v.type=="_const_ different")
+        else if (v.type == "different" || v.type == "_const_ different")
             fout << "Type: " << v.type << " Name: " << v.name << " Value: " << ast.ret_value_float(v.value) << " Defined: " << v.def << endl;
         else
             fout << "Type: " << v.type << " Name: " << v.name << " Value: " << v.value << " Defined: " << v.def << endl;
@@ -158,6 +178,12 @@ void symbolTable::printTable()
         for (auto vect : f.parameters)
             fout << vect << " ";
         fout << " Defined: " << f.def << endl;
+    }
+    fout << endl;
+    fout << "Information about class:" << endl;
+    for (classInfo c : classInfoShow)
+    {
+        fout << "Name: " << c.name << " Defined: " << c.def << endl;
     }
 }
 
@@ -187,11 +213,11 @@ vector<Tokens> AST::lexing(const string &input)
         {
             str.push_back(*elements);
             elements++;
-            if(*elements=='+' || *elements=='-' || *elements=='*' || *elements=='/' || *elements == '%')
+            if (*elements == '+' || *elements == '-' || *elements == '*' || *elements == '/' || *elements == '%')
             {
                 str.push_back(*elements);
                 elements++;
-                if(*elements=='_')
+                if (*elements == '_')
                     str.push_back(*elements);
                 else
                     throw runtime_error("Eroare: Expresie incorecta!");
@@ -465,7 +491,10 @@ Operations AST::parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::ite
             tokens_iter++;
             left_expr = parse_bool(tokens, tokens_iter);
             new_expr.left_expr = make_unique<Operations>(move(left_expr));
-            left_expr = move(new_expr);
+            if (tokens.size() == 2)
+                expr = move(new_expr);
+            else
+                left_expr = move(new_expr);
         }
         else
             left_expr = parse_bool(tokens, tokens_iter);
@@ -504,7 +533,7 @@ Operations AST::parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::ite
                             new_expr.left_expr = make_unique<Operations>(move(right_expr));
                             if (tokens_iter->value == "_!_")
                             {
-                                new_expr.right_expr= make_unique<Operations>();
+                                new_expr.right_expr = make_unique<Operations>();
                                 new_expr.right_expr->value = tokens_iter->value;
                                 new_expr.right_expr->type = tokens_iter->type;
                                 tokens_iter++;
@@ -579,7 +608,7 @@ int AST::result_int(const Operations &node)
         }
         return result_int(*node.left_expr) / right_value;
     }
-    else if(node.value == "_%_")
+    else if (node.value == "_%_")
         return result_int(*node.left_expr) % result_int(*node.right_expr);
     else
     {
@@ -697,9 +726,9 @@ string AST::ret_value_int(string input)
 {
     auto t = lexing(input);
     auto expr = parsing(t);
-    //preorder(expr); cout<<endl;
+    // preorder(expr); cout<<endl;
     auto res = result_int(expr);
-    //cout << "Rezultatul: " << res<<endl;
+    // cout << "Rezultatul: " << res<<endl;
     string value = to_string(res);
     return value;
 }
@@ -708,9 +737,9 @@ string AST::ret_value_float(string input)
 {
     auto t = lexing(input);
     auto expr = parsing(t);
-    //preorder(expr); cout<<endl;
+    // preorder(expr); cout<<endl;
     auto res = result_float(expr);
-    //cout << "Rezultatul: " << res<<endl;
+    // cout << "Rezultatul: " << res<<endl;
     string value = to_string(res);
     return value;
 }
@@ -719,10 +748,10 @@ string AST::ret_value_bool(string input)
 {
     auto t = lexing_bool(input);
     auto expr = parsing_bool(t);
-    //preorder(expr); cout<<endl;
+    // preorder(expr); cout<<endl;
     auto res = result_bool(expr);
-    //cout << "Rezultatul: " << res<<endl;
-    if(res==1)
+    // cout << "Rezultatul: " << res<<endl;
+    if (res == 1)
         return "true";
     return "false";
 }
