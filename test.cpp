@@ -341,8 +341,8 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
             tokens_iter++;
             left_expr = parse_bool(tokens, tokens_iter);
             new_expr.left_expr = make_unique<Operations>(move(left_expr));
-            if(tokens.size()==2)
-                expr=move(new_expr);
+            if (tokens.size() == 2)
+                expr = move(new_expr);
             else
                 left_expr = move(new_expr);
         }
@@ -383,7 +383,7 @@ Operations parse_expression_bool(vector<Tokens> tokens, vector<Tokens>::iterator
                             new_expr.left_expr = make_unique<Operations>(move(right_expr));
                             if (tokens_iter->value == "_!_")
                             {
-                                new_expr.right_expr= make_unique<Operations>();
+                                new_expr.right_expr = make_unique<Operations>();
                                 new_expr.right_expr->value = tokens_iter->value;
                                 new_expr.right_expr->type = tokens_iter->type;
                                 tokens_iter++;
@@ -588,6 +588,124 @@ int result_bool(const Operations &node)
     }
 }
 
+bool isInteger(const string &s)
+{
+    try
+    {
+        int nr = stoi(s);
+        if (s == to_string(nr))
+            return true;
+        else
+            return false;
+    }
+    catch (...)
+    {
+        return false;
+    }
+}
+
+bool isFloat(const string &s)
+{
+    if (isInteger(s) == true)
+    {
+        return false;
+    }
+    else
+    {
+        try
+        {
+            stof(s);
+            return true;
+        }
+        catch (...)
+        {
+            return false;
+        }
+    }
+}
+
+bool isChar(const string &s)
+{
+    if (isInteger(s) == true)
+    {
+        return false;
+    }
+    else if (s.length() == 1)
+        return true;
+    else
+        return false;
+}
+
+bool isBool(const string &s)
+{
+    if (s == "true")
+        return true;
+    else if (s == "false")
+        return true;
+    else
+        return false;
+}
+
+bool isString(const string &s)
+{
+    int i = 0;
+    while (s[i] != '\0')
+    {
+        if ((s[i] < 'A' || s[i] > 'Z') && (s[i] < 'a' || s[i] > 'z'))
+            return false;
+        i++;
+    }
+    if (isFloat(s) == true || isInteger(s) == true || isBool(s) == true)
+        return false;
+    else if (s[0] != '_' && s.length() > 1)
+        return true;
+    else
+        return false;
+}
+
+string ret_type(const string &s)
+{
+    if (isInteger(s) == true)
+        return "normal";
+    else if (isFloat(s) == true)
+        return "different";
+    else if (isBool(s) == true)
+        return "decision";
+    else
+        return "";
+}
+
+string expr_type(const string &s)
+{
+    auto tokens=lexing_bool(s);
+    bool OK = false, b = false;
+    string verif;
+    if (s.find("eq") != -1 || s.find("neq") != -1 || s.find("low") != -1 || s.find("great") != -1 || s.find("leq") != -1 || s.find("geq") != -1 || s.find("_&_") != -1 || s.find("_|_") != -1 || s.find("_!_") != -1)
+    {
+        b = true;
+        verif = "decision";
+    }
+    for (auto token : tokens)
+    {
+        if (b == true)
+        {
+            if (token.type == 0 && ret_type(token.value) == "different")
+                return "Eroare!";
+        }
+        else
+        {
+            if (token.type == 0 && OK == false)
+            {
+                OK = true;
+                verif = ret_type(token.value);
+            }
+            if (token.type == 0 && ret_type(token.value) != verif)
+                return "Eroare!";
+        }
+    }
+    return verif;
+}
+
 int main()
 {
     /*string input = "(((2 _+_ 5) _*_ 5 _%_ 3) _*_ 10) _/_ 4 _-_ 2";
@@ -603,7 +721,7 @@ int main()
     cout << "Rezultatul:" << result_int(expr);
     cout << endl;*/
 
-    string input = "_!_((4 eq (10 _-_ 6)) _&_ _!_true _|_ _!_false) eq (12 neq 12) neq _!_true _&_ _!_(3 great 4)";
+    /*string input = "_!_((4 eq (10 _-_ 6)) _&_ _!_true _|_ _!_false) eq (12 neq 12) neq _!_true _&_ _!_(3 great 4)";
     //string input="_!_false";
     auto t = lexing_bool(input);
     for (auto token : t)
@@ -620,7 +738,17 @@ int main()
     else
         res = "false";
     cout << "Rezultatul:" << res;
-    cout << endl;
+    cout << endl;*/
+
+    string input = "(((2 _+_ 5) _*_ 5 _%_ 3) _*_ 10) _/_ 4 _-_ 2";
+    auto t = lexing_bool(input);
+    for (auto token : t)
+    {
+        cout << "Tipul:" << token.type << " "
+             << "Valoarea:" << token.value << endl;
+    }
+    cout << expr_type(input)<<endl;
+   
 
     return 0;
 }

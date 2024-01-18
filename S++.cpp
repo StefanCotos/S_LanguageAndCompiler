@@ -756,6 +756,49 @@ string AST::ret_value_bool(string input)
     return "false";
 }
 
+string AST::ret_type(const string &s)
+{
+    if (isInteger(s) == true)
+        return "normal";
+    else if (isFloat(s) == true)
+        return "different";
+    else if (isBool(s) == true)
+        return "decision";
+    else
+        return "";
+}
+
+string AST::expr_type(const string &s)
+{
+    auto tokens=lexing_bool(s);
+    bool OK = false, b = false;
+    string verif;
+    if (s.find("eq") != -1 || s.find("neq") != -1 || s.find("low") != -1 || s.find("great") != -1 || s.find("leq") != -1 || s.find("geq") != -1 || s.find("_&_") != -1 || s.find("_|_") != -1 || s.find("_!_") != -1)
+    {
+        b = true;
+        verif = "decision";
+    }
+    for (auto token : tokens)
+    {
+        if (b == true)
+        {
+            if (token.type == 0 && ret_type(token.value) == "different")
+                return "Eroare!";
+        }
+        else
+        {
+            if (token.type == 0 && OK == false)
+            {
+                OK = true;
+                verif = ret_type(token.value);
+            }
+            if (token.type == 0 && ret_type(token.value) != verif)
+                return "Eroare!";
+        }
+    }
+    return verif;
+}
+
 void AST::preorder(const Operations &node)
 {
     std::cout << node.value << "(" << node.type << ")"

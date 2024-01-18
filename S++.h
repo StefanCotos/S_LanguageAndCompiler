@@ -8,6 +8,12 @@
 #include <stack>
 using namespace std;
 
+extern bool isInteger(const string& s);
+extern bool isFloat(const string& s);
+extern bool isChar(const string& s);
+extern bool isBool(const string& s);
+extern bool isString(const string& s);
+
 struct varInfo
 {
     string name;
@@ -78,6 +84,8 @@ public:
     string ret_value_int(string input);
     string ret_value_float(string input);
     string ret_value_bool(string input);
+    string ret_type(const string &s);
+    string expr_type(const string &s);
 
 };
 

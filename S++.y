@@ -37,6 +37,8 @@ bool isFloat(const string& s);
 bool isChar(const string& s);
 bool isBool(const string& s);
 bool isString(const string& s);
+string Eval(const string& input);
+string TypeOf(const string& input);
 
 %}
 
@@ -169,37 +171,37 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         yyerror("The variable is already defined!");
                                     } 
 
-                                    table.addVar(current_type, $2, $4, current_def_var);
+                                    table.addVar(current_type, $2, $4, current_def_var);}
                                  
-                                    if(isInteger($4)==true && string($1)!="normal")
+                                    /* if(isInteger($4)==true && string($1)!="normal")
                                     {
-                                            yyerror("INT Left type: " + string($1) + " right type: " + string($4));
+                                            yyerror("Left type: " + string($1) + " right type: " + string($4));
                                     }
                                     else if(isFloat($4)==true && string($1)!="different")
                                         {
-                                            yyerror("FLOAT Left type: " + string($1) + " right type: " + string($4));
+                                            yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
                                     else if(isChar($4)==true && string($1)!="unique")
                                         {
-                                            yyerror("CHAR Left type: " + string($1) + " right type: " + string($4));
+                                            yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
                                     else if(isBool($4)==true && string($1)!="decision")
                                         {
-                                            yyerror("BOOL Left type: " + string($1) + " right type: " + string($4));
+                                            yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
                                     else if(isString($4)==true && string($1)!="special")
                                         {
-                                            yyerror("STRING Left type: " + string($1) + " right type: " + string($4));
+                                            yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
-                                    }
+                                    } */
     | CONST types ID ASSIGN expression {
                                     if(table.varName($2)!="NULL")
                                         {
                                             yyerror("The variable is already defined!");
                                         } 
                                     
-                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);
-                                    if(isInteger($5)==true && string($2)!="normal")
+                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);}
+                                    /*if(isInteger($5)==true && string($2)!="normal")
                                     {
                                         yyerror("Left type :" + string($2) + " right type: " + string($5));
                                     }
@@ -219,10 +221,10 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         {
                                             yyerror("Left type: " + string($2) + " right type: " + string($5));
                                         }
-                                    }
+                                    }*/
     ;
 
-assign_statements: left_value ASSIGN expression  {
+assign_statements: left_value ASSIGN expression  /*{
                                                 if(isInteger($3)==true && table.varType(string($1))!="normal")
                                                 {
                                                     yyerror("Left type :" + table.varType(string($1)) + " right type: " + string($3));
@@ -243,7 +245,7 @@ assign_statements: left_value ASSIGN expression  {
                                                     {
                                                         yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
                                                     }
-                                                }
+                                                }*/
                                                 // statement ul de assignare 
                 ;
 
@@ -284,8 +286,20 @@ value: NR {$$=$1;}     //diferite valori ce pot fii atribuite variabilelor/funct
     | '<''<' STRING '>''>'  {current_value=string($3); $$=current_value.c_str();}
     | '<' CHAR '>' {current_value=string($2);$$=current_value.c_str();}
     | ID '[' NR ']' {current_value=string($1)+"["+string($3)+"]";  $$=current_value.c_str();}
-    | ID {current_value=(table.varVal($1)).c_str(); $$=(table.varVal($1)).c_str();} 
-    | func_call /* {$$="1";} */
+    | ID {$$=$1;} 
+    | func_call  //{
+                /* if(table.funcType($1)=="normal")
+                    current_value="1";
+                else if(table.funcType($1)=="different")
+                    current_value="1.0";
+                else if(table.funcType($1)=="decision")
+                    current_value="true";
+                else if(table.funcType($1)=="unique")
+                    current_value="a";
+                else if(table.funcType($1)=="special")
+                    current_value="Hello"; */
+                // $$=$1;
+                // }
     | STRING '-''>' ID {current_value=string($1)+"->"+string($4); $$=current_value.c_str();}
     ;
 
@@ -336,7 +350,7 @@ for_statement: FOR_STATEMENT '(' assign_statements ';' boolean_expression ';' as
 
 loop_statement: LOOP_STATEMENT '{' list_statements '}'   // forma pentru loop
 
-func_call: STRING '(' list_calls ')' {  /* $$=$1; */
+func_call: STRING '(' list_calls ')' { $$=$1;
                                         if (definedFunctions.find($1) == definedFunctions.end()) 
                                         {
                                             yyerror("Function not defined: " + string($1));
@@ -370,8 +384,16 @@ func_call: STRING '(' list_calls ')' {  /* $$=$1; */
                                             }
 
                                         funcparam = "";}} // apelurile de functii
-        | EVAL '(' expression ')'
-        | TYPEOF '(' expression ')'
+        | EVAL '(' expression ')' { if(Eval($3)!="Eroare!")
+                                        cout<<Eval($3)<<endl;
+                                    else
+                                        yyerror("The operands of the expression are not of the same type!");
+                                         }
+        | TYPEOF '(' expression ')' {if(TypeOf($3)!="Eroare!")
+                                        cout<<TypeOf($3)<<endl;
+                                    else
+                                        yyerror("The operands of the expression are not of the same type!");
+                                         }
         ;
 
 list_calls: expression  {
@@ -427,13 +449,20 @@ void yyerror(const string& s){
 
 string Eval(const string& input)
 {
-
+    if(ast.expr_type(input)=="normal")
+        return ast.ret_value_int(input);
+    else if(ast.expr_type(input)=="different")
+        return ast.ret_value_float(input);
+    else if(ast.expr_type(input)=="decision")
+        return ast.ret_value_bool(input);
+    else if(ast.expr_type(input)=="Eroare!")
+        return ast.expr_type(input);
     return "";
 }
 
 string TypeOf(const string& input)
 {
-    return "";
+    return ast.expr_type(input);
 }
 
 int countWords(const string& input) 
