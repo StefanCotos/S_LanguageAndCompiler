@@ -170,12 +170,12 @@ decl: types ID { if(table.varName($2)!="NULL")
                                     {
                                         yyerror("The variable is already defined! " + string($2));
                                     } 
-
+                                    table.addVar(current_type, $2, $4, current_def_var);
                                     string verif;
-                                    if(isString($4)!=true && isChar($4)!=true)
+                                    if(isString($4)!=true && isChar($4)!=true && isBool($4)!=true)
                                         verif=TypeOf($4);
 
-                                    table.addVar(current_type, $2, $4, current_def_var);
+                                    
                                  
                                     if(verif=="normal" && string($1)!="normal")
                                     {
@@ -189,7 +189,7 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         {
                                             yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
-                                    else if(verif=="decision" && string($1)!="decision")
+                                    else if(isBool($4)==true && string($1)!="decision")
                                         {
                                             yyerror("Left type: " + string($1) + " right type: " + string($4));
                                         }
@@ -204,11 +204,13 @@ decl: types ID { if(table.varName($2)!="NULL")
                                             yyerror("The variable is already defined! " + string($3));
                                         } 
                                     
+                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);
+
                                     string verif;
-                                    if(isString($5)!=true && isChar($5)!=true)
+                                    if(isString($5)!=true && isChar($5)!=true && isBool($5)!=true)
                                         verif=TypeOf($5);
 
-                                    table.addVar(string($1)+" "+current_type, $3, $5, current_def_var);
+                                    
                                     if(verif=="normal" && string($2)!="normal")
                                     {
                                         yyerror("Left type :" + string($2) + " right type: " + string($5));
@@ -221,7 +223,7 @@ decl: types ID { if(table.varName($2)!="NULL")
                                         {
                                             yyerror("Left type: " + string($2) + " right type: " + string($5));
                                         }
-                                    else if(verif=="decision" && string($2)!="decision")
+                                    else if(isBool($5)==true && string($2)!="decision")
                                         {
                                             yyerror("Left type: " + string($2) + " right type: " + string($5));
                                         }
@@ -232,10 +234,10 @@ decl: types ID { if(table.varName($2)!="NULL")
                                     }
     ;
 
-assign_statements: left_value ASSIGN expression  {
+assign_statements: left_value ASSIGN expression {
 
                                                 string verif;
-                                                if(isString($3)!=true && isChar($3)!=true)
+                                                if(isString($3)!=true && isChar($3)!=true && isBool($3)!=true)
                                                     verif=TypeOf($3);
 
                                                 if(verif=="normal" && table.varType(string($1))!="normal")
@@ -250,7 +252,7 @@ assign_statements: left_value ASSIGN expression  {
                                                     {
                                                         yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
                                                     }
-                                                else if(verif=="decision" && table.varType(string($1))!="decision")
+                                                else if(isBool($3)==true && table.varType(string($1))!="decision")
                                                     {
                                                         yyerror("Left type: " + table.varType(string($1)) + " right type: " + string($3));
                                                     }
@@ -299,20 +301,21 @@ value: NR {$$=$1;}     //diferite valori ce pot fii atribuite variabilelor/funct
     | '<''<' STRING '>''>'  {current_value=string($3); $$=current_value.c_str();}
     | '<' CHAR '>' {current_value=string($2);$$=current_value.c_str();}
     | ID '[' NR ']' {current_value=string($1)+"["+string($3)+"]";  $$=current_value.c_str();}
-    | ID {$$=$1;} 
-    | func_call  //{
-                /* if(table.funcType($1)=="normal")
+    | ID {/* $$=$1; */ current_value=table.varVal($1); $$=current_value.c_str(); } 
+    | func_call  {
+                if(table.funcType($1)=="normal")
                     current_value="1";
                 else if(table.funcType($1)=="different")
-                    current_value="1.0";
+                    current_value="0.0";
                 else if(table.funcType($1)=="decision")
                     current_value="true";
                 else if(table.funcType($1)=="unique")
                     current_value="a";
                 else if(table.funcType($1)=="special")
-                    current_value="Hello"; */
-                // $$=$1;
-                // }
+                    current_value="Hello";
+                $$=current_value.c_str();
+                
+                }
     | STRING '-''>' ID {current_value=string($1)+"->"+string($4); $$=current_value.c_str();}
     ;
 

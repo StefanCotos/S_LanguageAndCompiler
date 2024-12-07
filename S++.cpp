@@ -163,11 +163,13 @@ void symbolTable::printTable()
     fout << "Information about variables:" << endl;
     for (varInfo v : varInfoShow)
     {
-        if (v.type == "normal" || v.type == "_const_ normal")
+        /* if (v.type == "normal" || v.type == "_const_ normal")
             fout << "Type: " << v.type << " Name: " << v.name << " Value: " << ast.ret_value_int(v.value) << " Defined: " << v.def << endl;
         else if (v.type == "different" || v.type == "_const_ different")
             fout << "Type: " << v.type << " Name: " << v.name << " Value: " << ast.ret_value_float(v.value) << " Defined: " << v.def << endl;
-        else
+        else if (v.type == "decision" || v.type == "_const_ decision")
+            fout << "Type: " << v.type << " Name: " << v.name << " Value: " << ast.ret_value_bool(v.value) << " Defined: " << v.def << endl;
+        else */
             fout << "Type: " << v.type << " Name: " << v.name << " Value: " << v.value << " Defined: " << v.def << endl;
     }
     fout << endl;
@@ -770,7 +772,7 @@ string AST::ret_type(const string &s)
 
 string AST::expr_type(const string &s)
 {
-    auto tokens=lexing_bool(s);
+    auto tokens = lexing_bool(s);
     bool OK = false, b = false;
     string verif;
     if (s.find("eq") != -1 || s.find("neq") != -1 || s.find("low") != -1 || s.find("great") != -1 || s.find("leq") != -1 || s.find("geq") != -1 || s.find("_&_") != -1 || s.find("_|_") != -1 || s.find("_!_") != -1)

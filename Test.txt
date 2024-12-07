@@ -19,12 +19,12 @@ func nr(decision _z, unique _f) -> normal
     give 6;
 }
 
-func str(special _q) -> decision
+func str(special _q) -> different
 {
     normal _rezist: 10;
 }
 
-func nothing()
+func nothing() -> decision
 {
     _x:5;
 }
@@ -32,17 +32,20 @@ func nothing()
 main_start
     
     cars->_xz:3;
-    normal _w: 10 _*_ (2 _+_ 4);
+    normal _w: _x _*_ (2 _+_ nr(true,<a>));
     _const_ different _y: 8.4;
     decision _ok:true;
     unique _c:<a>;
-    decision _a[2];
-    different _fF: 15 _-_ 2.3 _+_ 3.1;
+    different _fF: 15.3 _-_ 2.3 _+_ 3.1;
     special _poz:<<CEVA>>;
     nothing();
-    Eval((8 _%_ 7) _+_ (2 _+_ 6) _-_ 4);
-    TypeOf(2.5 _+_ 4.2);
-    nr(str(_poz), <c>);
+    Eval((14 _+_ 5) _+_ (_x _+_ 6) _-_ 4);
+  
+    TypeOf(true);
+    nothing();
+    
+
+    
     str(<<Salut>>);
 
 main_stop

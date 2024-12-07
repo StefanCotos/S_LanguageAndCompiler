@@ -637,13 +637,13 @@ static const yytype_int16 yyrline[] =
       96,    99,   100,   103,   103,   104,   107,   108,   111,   111,
      112,   112,   115,   116,   119,   120,   123,   126,   126,   129,
      130,   132,   133,   134,   135,   136,   137,   138,   139,   140,
-     141,   142,   143,   152,   155,   158,   163,   169,   201,   235,
-     265,   268,   274,   280,   297,   298,   299,   300,   301,   302,
-     303,   316,   319,   320,   324,   325,   326,   327,   328,   329,
-     330,   333,   334,   335,   336,   337,   338,   339,   340,   341,
-     342,   343,   344,   345,   346,   349,   350,   353,   354,   355,
-     358,   361,   364,   366,   400,   405,   412,   430,   448,   451,
-     454,   455
+     141,   142,   143,   152,   155,   158,   163,   169,   201,   237,
+     267,   270,   276,   282,   299,   300,   301,   302,   303,   304,
+     305,   319,   322,   323,   327,   328,   329,   330,   331,   332,
+     333,   336,   337,   338,   339,   340,   341,   342,   343,   344,
+     345,   346,   347,   348,   349,   352,   353,   356,   357,   358,
+     361,   364,   367,   369,   403,   408,   415,   433,   451,   454,
+     457,   458
 };
 #endif
 
@@ -1511,12 +1511,12 @@ yyreduce:
                                     {
                                         yyerror("The variable is already defined! " + string((yyvsp[-2].string)));
                                     } 
-
+                                    table.addVar(current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);
                                     string verif;
-                                    if(isString((yyvsp[0].string))!=true && isChar((yyvsp[0].string))!=true)
+                                    if(isString((yyvsp[0].string))!=true && isChar((yyvsp[0].string))!=true && isBool((yyvsp[0].string))!=true)
                                         verif=TypeOf((yyvsp[0].string));
 
-                                    table.addVar(current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);
+                                    
                                  
                                     if(verif=="normal" && string((yyvsp[-3].string))!="normal")
                                     {
@@ -1530,7 +1530,7 @@ yyreduce:
                                         {
                                             yyerror("Left type: " + string((yyvsp[-3].string)) + " right type: " + string((yyvsp[0].string)));
                                         }
-                                    else if(verif=="decision" && string((yyvsp[-3].string))!="decision")
+                                    else if(isBool((yyvsp[0].string))==true && string((yyvsp[-3].string))!="decision")
                                         {
                                             yyerror("Left type: " + string((yyvsp[-3].string)) + " right type: " + string((yyvsp[0].string)));
                                         }
@@ -1550,11 +1550,13 @@ yyreduce:
                                             yyerror("The variable is already defined! " + string((yyvsp[-2].string)));
                                         } 
                                     
+                                    table.addVar(string((yyvsp[-4].string))+" "+current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);
+
                                     string verif;
-                                    if(isString((yyvsp[0].string))!=true && isChar((yyvsp[0].string))!=true)
+                                    if(isString((yyvsp[0].string))!=true && isChar((yyvsp[0].string))!=true && isBool((yyvsp[0].string))!=true)
                                         verif=TypeOf((yyvsp[0].string));
 
-                                    table.addVar(string((yyvsp[-4].string))+" "+current_type, (yyvsp[-2].string), (yyvsp[0].string), current_def_var);
+                                    
                                     if(verif=="normal" && string((yyvsp[-3].string))!="normal")
                                     {
                                         yyerror("Left type :" + string((yyvsp[-3].string)) + " right type: " + string((yyvsp[0].string)));
@@ -1567,7 +1569,7 @@ yyreduce:
                                         {
                                             yyerror("Left type: " + string((yyvsp[-3].string)) + " right type: " + string((yyvsp[0].string)));
                                         }
-                                    else if(verif=="decision" && string((yyvsp[-3].string))!="decision")
+                                    else if(isBool((yyvsp[0].string))==true && string((yyvsp[-3].string))!="decision")
                                         {
                                             yyerror("Left type: " + string((yyvsp[-3].string)) + " right type: " + string((yyvsp[0].string)));
                                         }
@@ -1576,15 +1578,15 @@ yyreduce:
                                             yyerror("Left type: " + string((yyvsp[-3].string)) + " right type: " + string((yyvsp[0].string)));
                                         }
                                     }
-#line 1580 "S++.tab.c"
+#line 1582 "S++.tab.c"
     break;
 
   case 59: /* assign_statements: left_value ASSIGN expression  */
-#line 235 "S++.y"
-                                                 {
+#line 237 "S++.y"
+                                                {
 
                                                 string verif;
-                                                if(isString((yyvsp[0].string))!=true && isChar((yyvsp[0].string))!=true)
+                                                if(isString((yyvsp[0].string))!=true && isChar((yyvsp[0].string))!=true && isBool((yyvsp[0].string))!=true)
                                                     verif=TypeOf((yyvsp[0].string));
 
                                                 if(verif=="normal" && table.varType(string((yyvsp[-2].string)))!="normal")
@@ -1599,7 +1601,7 @@ yyreduce:
                                                     {
                                                         yyerror("Left type: " + table.varType(string((yyvsp[-2].string))) + " right type: " + string((yyvsp[0].string)));
                                                     }
-                                                else if(verif=="decision" && table.varType(string((yyvsp[-2].string)))!="decision")
+                                                else if(isBool((yyvsp[0].string))==true && table.varType(string((yyvsp[-2].string)))!="decision")
                                                     {
                                                         yyerror("Left type: " + table.varType(string((yyvsp[-2].string))) + " right type: " + string((yyvsp[0].string)));
                                                     }
@@ -1608,33 +1610,33 @@ yyreduce:
                                                         yyerror("Left type: " + table.varType(string((yyvsp[-2].string))) + " right type: " + string((yyvsp[0].string)));
                                                     }
                                                 }
-#line 1612 "S++.tab.c"
+#line 1614 "S++.tab.c"
     break;
 
   case 61: /* left_value: ID  */
-#line 268 "S++.y"
+#line 270 "S++.y"
                {(yyval.string)=(yyvsp[0].string);
                 current_id=(yyvsp[0].string);
                  if (table.varName(current_id) == "NULL")
                 {
                     yyerror("Variable not defined!");
                 }}
-#line 1623 "S++.tab.c"
+#line 1625 "S++.tab.c"
     break;
 
   case 62: /* left_value: ID '[' NR ']'  */
-#line 274 "S++.y"
+#line 276 "S++.y"
                      {(yyval.string)=(yyvsp[-3].string);
                     current_id=(yyvsp[-3].string);
                  if (table.varName(current_id) == "NULL")
                 {
                     yyerror("Vector not defined!");
                 }}
-#line 1634 "S++.tab.c"
+#line 1636 "S++.tab.c"
     break;
 
   case 63: /* left_value: STRING '-' '>' ID  */
-#line 280 "S++.y"
+#line 282 "S++.y"
                        {(yyval.string)=(yyvsp[0].string);
                     if(table.varName((yyvsp[0].string))=="NULL")
                     {
@@ -1650,191 +1652,210 @@ yyreduce:
                     }
 
                 }
-#line 1654 "S++.tab.c"
+#line 1656 "S++.tab.c"
     break;
 
   case 64: /* value: NR  */
-#line 297 "S++.y"
+#line 299 "S++.y"
           {(yyval.string)=(yyvsp[0].string);}
-#line 1660 "S++.tab.c"
+#line 1662 "S++.tab.c"
     break;
 
   case 65: /* value: NR '.' NR  */
-#line 298 "S++.y"
+#line 300 "S++.y"
                  {current_value=string((yyvsp[-2].string))+"."+string((yyvsp[0].string)); (yyval.string)=current_value.c_str();}
-#line 1666 "S++.tab.c"
+#line 1668 "S++.tab.c"
     break;
 
   case 66: /* value: '<' '<' STRING '>' '>'  */
-#line 299 "S++.y"
+#line 301 "S++.y"
                             {current_value=string((yyvsp[-2].string)); (yyval.string)=current_value.c_str();}
-#line 1672 "S++.tab.c"
+#line 1674 "S++.tab.c"
     break;
 
   case 67: /* value: '<' CHAR '>'  */
-#line 300 "S++.y"
+#line 302 "S++.y"
                    {current_value=string((yyvsp[-1].string));(yyval.string)=current_value.c_str();}
-#line 1678 "S++.tab.c"
+#line 1680 "S++.tab.c"
     break;
 
   case 68: /* value: ID '[' NR ']'  */
-#line 301 "S++.y"
+#line 303 "S++.y"
                     {current_value=string((yyvsp[-3].string))+"["+string((yyvsp[-1].string))+"]";  (yyval.string)=current_value.c_str();}
-#line 1684 "S++.tab.c"
+#line 1686 "S++.tab.c"
     break;
 
   case 69: /* value: ID  */
-#line 302 "S++.y"
-         {(yyval.string)=(yyvsp[0].string);}
-#line 1690 "S++.tab.c"
+#line 304 "S++.y"
+         {/* $$=$1; */ current_value=table.varVal((yyvsp[0].string)); (yyval.string)=current_value.c_str(); }
+#line 1692 "S++.tab.c"
+    break;
+
+  case 70: /* value: func_call  */
+#line 305 "S++.y"
+                 {
+                if(table.funcType((yyvsp[0].string))=="normal")
+                    current_value="1";
+                else if(table.funcType((yyvsp[0].string))=="different")
+                    current_value="0.0";
+                else if(table.funcType((yyvsp[0].string))=="decision")
+                    current_value="true";
+                else if(table.funcType((yyvsp[0].string))=="unique")
+                    current_value="a";
+                else if(table.funcType((yyvsp[0].string))=="special")
+                    current_value="Hello";
+                (yyval.string)=current_value.c_str();
+                
+                }
+#line 1711 "S++.tab.c"
     break;
 
   case 71: /* value: STRING '-' '>' ID  */
-#line 316 "S++.y"
+#line 319 "S++.y"
                        {current_value=string((yyvsp[-3].string))+"->"+string((yyvsp[0].string)); (yyval.string)=current_value.c_str();}
-#line 1696 "S++.tab.c"
+#line 1717 "S++.tab.c"
     break;
 
   case 72: /* expression: arithmetic_expression  */
-#line 319 "S++.y"
+#line 322 "S++.y"
                                   {(yyval.string)=(yyvsp[0].string);}
-#line 1702 "S++.tab.c"
+#line 1723 "S++.tab.c"
     break;
 
   case 73: /* expression: boolean_expression  */
-#line 320 "S++.y"
+#line 323 "S++.y"
                              {(yyval.string)=(yyvsp[0].string);}
-#line 1708 "S++.tab.c"
+#line 1729 "S++.tab.c"
     break;
 
   case 74: /* arithmetic_expression: arithmetic_expression PLUS arithmetic_expression  */
-#line 324 "S++.y"
+#line 327 "S++.y"
                                                                         { current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1714 "S++.tab.c"
+#line 1735 "S++.tab.c"
     break;
 
   case 75: /* arithmetic_expression: arithmetic_expression MINUS arithmetic_expression  */
-#line 325 "S++.y"
+#line 328 "S++.y"
                                                              {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1720 "S++.tab.c"
+#line 1741 "S++.tab.c"
     break;
 
   case 76: /* arithmetic_expression: arithmetic_expression MUL arithmetic_expression  */
-#line 326 "S++.y"
+#line 329 "S++.y"
                                                            {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1726 "S++.tab.c"
+#line 1747 "S++.tab.c"
     break;
 
   case 77: /* arithmetic_expression: arithmetic_expression DIV arithmetic_expression  */
-#line 327 "S++.y"
+#line 330 "S++.y"
                                                            {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1732 "S++.tab.c"
+#line 1753 "S++.tab.c"
     break;
 
   case 78: /* arithmetic_expression: arithmetic_expression MOD arithmetic_expression  */
-#line 328 "S++.y"
+#line 331 "S++.y"
                                                            {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1738 "S++.tab.c"
+#line 1759 "S++.tab.c"
     break;
 
   case 79: /* arithmetic_expression: value  */
-#line 329 "S++.y"
+#line 332 "S++.y"
                  {(yyval.string)=(yyvsp[0].string); }
-#line 1744 "S++.tab.c"
+#line 1765 "S++.tab.c"
     break;
 
   case 80: /* arithmetic_expression: '(' arithmetic_expression ')'  */
-#line 330 "S++.y"
+#line 333 "S++.y"
                                         {current="("+string((yyvsp[-1].string))+")"; (yyval.string)=current.c_str();}
-#line 1750 "S++.tab.c"
+#line 1771 "S++.tab.c"
     break;
 
   case 81: /* boolean_expression: arithmetic_expression EQUAL arithmetic_expression  */
-#line 333 "S++.y"
+#line 336 "S++.y"
                                                                       {current=(string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string))).c_str(); (yyval.string)=current.c_str();}
-#line 1756 "S++.tab.c"
+#line 1777 "S++.tab.c"
     break;
 
   case 82: /* boolean_expression: arithmetic_expression NOT_EQUAL arithmetic_expression  */
-#line 334 "S++.y"
+#line 337 "S++.y"
                                                                          {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1762 "S++.tab.c"
+#line 1783 "S++.tab.c"
     break;
 
   case 83: /* boolean_expression: arithmetic_expression LOWER arithmetic_expression  */
-#line 335 "S++.y"
+#line 338 "S++.y"
                                                                      {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1768 "S++.tab.c"
+#line 1789 "S++.tab.c"
     break;
 
   case 84: /* boolean_expression: arithmetic_expression GREATER arithmetic_expression  */
-#line 336 "S++.y"
+#line 339 "S++.y"
                                                                        {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1774 "S++.tab.c"
+#line 1795 "S++.tab.c"
     break;
 
   case 85: /* boolean_expression: arithmetic_expression LOWER_EQUAL arithmetic_expression  */
-#line 337 "S++.y"
+#line 340 "S++.y"
                                                                            {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1780 "S++.tab.c"
+#line 1801 "S++.tab.c"
     break;
 
   case 86: /* boolean_expression: arithmetic_expression GREATER_EQUAL arithmetic_expression  */
-#line 338 "S++.y"
+#line 341 "S++.y"
                                                                              {current=string((yyvsp[-2].string))+" "+string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1786 "S++.tab.c"
+#line 1807 "S++.tab.c"
     break;
 
   case 87: /* boolean_expression: '(' boolean_expression ')' EQUAL boolean_expression  */
-#line 339 "S++.y"
+#line 342 "S++.y"
                                                                        {current="(" + string((yyvsp[-4].string)) + ")" +" "+string((yyvsp[-3].string))+" "+string((yyvsp[-2].string)); (yyval.string)=current.c_str();}
-#line 1792 "S++.tab.c"
+#line 1813 "S++.tab.c"
     break;
 
   case 88: /* boolean_expression: '(' boolean_expression ')' NOT_EQUAL boolean_expression  */
-#line 340 "S++.y"
+#line 343 "S++.y"
                                                                            {current="(" + string((yyvsp[-4].string)) + ")" +" "+string((yyvsp[-3].string))+" "+string((yyvsp[-2].string)); (yyval.string)=current.c_str();}
-#line 1798 "S++.tab.c"
+#line 1819 "S++.tab.c"
     break;
 
   case 89: /* boolean_expression: '(' boolean_expression ')' AND boolean_expression  */
-#line 341 "S++.y"
+#line 344 "S++.y"
                                                                      {current="(" + string((yyvsp[-4].string)) + ")" +" "+string((yyvsp[-3].string))+" "+string((yyvsp[-2].string)); (yyval.string)=current.c_str();}
-#line 1804 "S++.tab.c"
+#line 1825 "S++.tab.c"
     break;
 
   case 90: /* boolean_expression: '(' boolean_expression ')' OR boolean_expression  */
-#line 342 "S++.y"
+#line 345 "S++.y"
                                                                     {current="(" + string((yyvsp[-4].string)) + ")" +" "+string((yyvsp[-3].string))+" "+string((yyvsp[-2].string)); (yyval.string)=current.c_str();}
-#line 1810 "S++.tab.c"
+#line 1831 "S++.tab.c"
     break;
 
   case 91: /* boolean_expression: NOT boolean_expression  */
-#line 343 "S++.y"
+#line 346 "S++.y"
                                           {current=string((yyvsp[-1].string))+" "+string((yyvsp[0].string)); (yyval.string)=current.c_str();}
-#line 1816 "S++.tab.c"
+#line 1837 "S++.tab.c"
     break;
 
   case 92: /* boolean_expression: '(' boolean_expression ')'  */
-#line 344 "S++.y"
+#line 347 "S++.y"
                                               {current="(" + string((yyvsp[-2].string)) + ")"; (yyval.string)=current.c_str();}
-#line 1822 "S++.tab.c"
+#line 1843 "S++.tab.c"
     break;
 
   case 93: /* boolean_expression: BOOL_TRUE  */
-#line 345 "S++.y"
+#line 348 "S++.y"
                              {(yyval.string)=(yyvsp[0].string);}
-#line 1828 "S++.tab.c"
+#line 1849 "S++.tab.c"
     break;
 
   case 94: /* boolean_expression: BOOL_FALSE  */
-#line 346 "S++.y"
+#line 349 "S++.y"
                               {(yyval.string)=(yyvsp[0].string);}
-#line 1834 "S++.tab.c"
+#line 1855 "S++.tab.c"
     break;
 
   case 103: /* func_call: STRING '(' list_calls ')'  */
-#line 366 "S++.y"
+#line 369 "S++.y"
                                      { (yyval.string)=(yyvsp[-3].string);
                                         if (definedFunctions.find((yyvsp[-3].string)) == definedFunctions.end()) 
                                         {
@@ -1869,31 +1890,31 @@ yyreduce:
                                             }
 
                                         funcparam = "";}}
-#line 1873 "S++.tab.c"
+#line 1894 "S++.tab.c"
     break;
 
   case 104: /* func_call: EVAL '(' expression ')'  */
-#line 400 "S++.y"
+#line 403 "S++.y"
                                   { if(Eval((yyvsp[-1].string))!="Eroare!")
                                         cout<<Eval((yyvsp[-1].string))<<endl;
                                     else
                                         yyerror("The operands of the expression are not of the same type!");
                                          }
-#line 1883 "S++.tab.c"
+#line 1904 "S++.tab.c"
     break;
 
   case 105: /* func_call: TYPEOF '(' expression ')'  */
-#line 405 "S++.y"
+#line 408 "S++.y"
                                     {if(TypeOf((yyvsp[-1].string))!="Eroare!")
                                         cout<<TypeOf((yyvsp[-1].string))<<endl;
                                     else
                                         yyerror("The operands of the expression are not of the same type!");
                                          }
-#line 1893 "S++.tab.c"
+#line 1914 "S++.tab.c"
     break;
 
   case 106: /* list_calls: expression  */
-#line 412 "S++.y"
+#line 415 "S++.y"
                         {
                         if(isInteger((yyvsp[0].string))==true)
                             {funcparam = "normal " + funcparam;}
@@ -1912,11 +1933,11 @@ yyreduce:
                         else
                             {yyerror("Variable/function not defined: " + string((yyvsp[0].string)));}
                         }
-#line 1916 "S++.tab.c"
+#line 1937 "S++.tab.c"
     break;
 
   case 107: /* list_calls: expression ',' list_calls  */
-#line 430 "S++.y"
+#line 433 "S++.y"
                                       {
                                      if(isInteger((yyvsp[-2].string))==true)
                                         {funcparam = "normal " + funcparam;}
@@ -1935,11 +1956,11 @@ yyreduce:
                                     else
                                         {yyerror("Variable/function not defined: " + string((yyvsp[-2].string)));}
                             }
-#line 1939 "S++.tab.c"
+#line 1960 "S++.tab.c"
     break;
 
 
-#line 1943 "S++.tab.c"
+#line 1964 "S++.tab.c"
 
       default: break;
     }
@@ -2132,7 +2153,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 457 "S++.y"
+#line 460 "S++.y"
 
 void yyerror(const string& s){
     cout<<"error: "<<s<<" at line: "<<yylineno<<endl;
